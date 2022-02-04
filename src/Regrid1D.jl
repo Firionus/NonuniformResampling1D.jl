@@ -106,7 +106,7 @@ function regrid(xin::StepRangeLen, yin, xout,
         input_start_ind = find_first_above_or_equal(input_start, xin)
         input_stop_ind = find_last_below_or_equal(input_stop, xin)
         # require at least one point in the window
-        @assert input_stop_ind >= input_start_ind
+        @assert input_stop_ind >= input_start_ind "input range $(input_start) to $(input_stop) does not contain at least one point"
 
         val_acc::Float64 = 0.
         win_acc::Float64 = 0.

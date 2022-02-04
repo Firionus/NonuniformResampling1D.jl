@@ -3,6 +3,9 @@ uuid = "6f747380-20fb-43ad-8521-36db71e92b2d"
 authors = ["Johannes Fried <jcmf.schule@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+
 [compat]
 julia = "1.6"
 

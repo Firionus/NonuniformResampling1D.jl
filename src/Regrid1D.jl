@@ -1,6 +1,8 @@
 module Regrid1D
 
-export regrid, HannBasis
+using SpecialFunctions
+
+export regrid, HannBasis, KaiserBasis
 
 struct FiniteBasisFunction{F<:Function, T<:Real}
     f::F # callback x::Real -> y::Real, x ∈ [0, Inf), 
@@ -15,6 +17,15 @@ HannBasis(width=1.) = FiniteBasisFunction(x -> begin
     # normalized integral would require pre-factor 2/width
     cos(pi*x/2/width)^2
 end, width)
+
+function KaiserBasis(width = 1.2; alpha = 3.5) 
+    FiniteBasisFunction(x -> begin
+    x < 0 && error("undefined for negative values")
+    x > width && return 0.
+    # TODO really slow, replace with ApproxFun or something like that
+    besseli(0, pi*alpha*sqrt(1-(x/width)^2))/besseli(0, pi*alpha)
+    end, width)
+end
 
 function find_first_above_or_equal(cutoff, x::StepRangeLen)
     # this doesn't work for all cases - assert the right ones
@@ -43,7 +54,7 @@ function find_last_below_or_equal(cutoff, x::StepRangeLen)
 end
 
 function regrid(xin::StepRangeLen, yin, xout,
-    smoothing_function::FiniteBasisFunction = HannBasis(1.),
+    smoothing_function::FiniteBasisFunction = KaiserBasis(),
     )
 
     # extent of smoothing function
@@ -59,7 +70,8 @@ function regrid(xin::StepRangeLen, yin, xout,
 
 
     # virtual first slice
-    slice_width = max(step, xout[2] - xout[1])
+    # TODO document that this results in nearest neighbor-like behavior when in_resolution < out_resolution
+    slice_width = max(step, xout[2] - xout[1]) 
     slice_start = xout[1] - slice_width
     slice_stop = xout[1]
 

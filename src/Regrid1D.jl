@@ -1,6 +1,6 @@
 module Regrid1D
 
-using SpecialFunctions
+using SpecialFunctions, Interpolations
 
 export regrid, HannBasis, KaiserBasis
 
@@ -18,12 +18,30 @@ HannBasis(width=1.) = FiniteBasisFunction(x -> begin
     cos(pi*x/2/width)^2
 end, width)
 
-function KaiserBasis(width = 1.2; alpha = 3.5) 
+function kaiser(x, alpha, width) 
+    besseli(0, pi*alpha*sqrt(1-(x/width)^2))/besseli(0, pi*alpha)
+end
+
+function KaiserBasis(width = 1.2; alpha = 3.5, samples=64) 
+    if samples < 2 # no approximation, e.g. with samples = 0
+        f = x -> kaiser(x, alpha, width)
+    else
+        # approximate for higher speed with linearly interpolated LUT
+        # the default of 64 samples results in errors of approximately < 0.3e-3
+        x = range(0, width, length=samples)
+        y = kaiser.(x, alpha, width)
+        itp = interpolate(y, BSpline(Linear()))
+        sitp = scale(itp, x)
+        f = x -> sitp(x) 
+        # evaluating these interpolations is somehow slow, as kaiser takes 10x longer than Hann. 
+        # But overall, that's not a big issue probably, since the difference between Hann and Kaiser is negligible when looking at the results. 
+        # So, we can probably take out the Kaiser window without much problems for my application
+    end
+
     FiniteBasisFunction(x -> begin
     x < 0 && error("undefined for negative values")
     x > width && return 0.
-    # TODO really slow, replace with ApproxFun or something like that
-    besseli(0, pi*alpha*sqrt(1-(x/width)^2))/besseli(0, pi*alpha)
+    f(x)
     end, width)
 end
 
@@ -54,7 +72,7 @@ function find_last_below_or_equal(cutoff, x::StepRangeLen)
 end
 
 function regrid(xin::StepRangeLen, yin, xout,
-    smoothing_function::FiniteBasisFunction = KaiserBasis(),
+    smoothing_function::FiniteBasisFunction = HannBasis(1.1),
     )
 
     # extent of smoothing function
@@ -94,7 +112,7 @@ function regrid(xin::StepRangeLen, yin, xout,
         for input_ind in input_start_ind:input_stop_ind
             x = xin[input_ind]
             rel_pos = (input_stop - x)/slice_width
-            win_value = smoothing_function.f(rel_pos)
+            win_value::Float64 = smoothing_function.f(rel_pos)
             win_acc += win_value
             val_acc += yin[input_ind]*win_value
         end
@@ -119,12 +137,12 @@ function regrid(xin::StepRangeLen, yin, xout,
         # require at least one point in the window
         @assert input_stop_ind >= input_start_ind
 
-        val_acc = 0.
-        win_acc = 0.
+        val_acc::Float64 = 0.
+        win_acc::Float64 = 0.
         for input_ind in input_start_ind:input_stop_ind
             x = xin[input_ind]
             rel_pos = (x - input_start)/slice_width
-            win_value = smoothing_function.f(rel_pos)
+            win_value::Float64 = smoothing_function.f(rel_pos)
             win_acc += win_value
             val_acc += yin[input_ind]*win_value
         end

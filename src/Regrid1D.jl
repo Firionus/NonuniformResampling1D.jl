@@ -68,12 +68,14 @@ function regrid(xin::StepRangeLen, yin, xout,
         # start with left slice
         input_start = slice_stop - slice_width*extent
         input_stop = slice_stop
+        @assert input_start >= xin[1]
+        @assert input_stop <= xin[end]
 
         #find relevant input points
         input_start_ind = find_first_above_or_equal(input_start, xin) # TODO if we always select or equal, we'll select values exactly on the output point twice and weigh them too heavily
         input_stop_ind = find_last_below_or_equal(input_stop, xin)
-        # allow one single point in the window
-        @assert input_stop_ind >= input_start_ind # do we need this?
+        # require at least one point in the window
+        @assert input_stop_ind >= input_start_ind
 
         val_acc = 0.
         win_acc = 0.
@@ -90,18 +92,20 @@ function regrid(xin::StepRangeLen, yin, xout,
         # left slice done
         # now right slice
         if out_ind < xout|>length # keep previous slice width on last element
-            slice_width = xout[out_ind + 1] - xout[out_ind] 
+            slice_width = max(step, xout[out_ind + 1] - xout[out_ind])
         end
         slice_start = xout[out_ind]
         slice_stop = xout[out_ind] + slice_width
 
         input_start = slice_start
         input_stop = slice_start + slice_width*extent
+        @assert input_start >= xin[1]
+        @assert input_stop <= xin[end]
 
         input_start_ind = find_first_above_or_equal(input_start, xin)
         input_stop_ind = find_last_below_or_equal(input_stop, xin)
-        # allow one single point in the window
-        @assert input_stop_ind >= input_start_ind # do we need this?
+        # require at least one point in the window
+        @assert input_stop_ind >= input_start_ind
 
         val_acc = 0.
         win_acc = 0.

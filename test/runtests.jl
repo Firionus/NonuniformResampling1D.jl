@@ -34,7 +34,7 @@ using Test
         xin = 1.0:1.0:7.0
         yin = [1.,2.,3.,4.,5.,6.,7.]
         xout = [2.4, 2.5, 3., 3.9]
-        @test regrid(xin, yin, xout) == [2.5, 2.5, 3.0, 3.5011357559800986]
+        @test regrid(xin, yin, xout) == [2.5, 2.5, 3.0, 3.5]
     end
 
 end

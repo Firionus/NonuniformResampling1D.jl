@@ -1,8 +1,6 @@
 module Regrid1D
 
-using SpecialFunctions, Interpolations
-
-export regrid, HannBasis, KaiserBasis
+export regrid, HannBasis
 
 struct FiniteBasisFunction{F<:Function, T<:Real}
     f::F # callback x::Real -> y::Real, x ∈ [0, Inf), 
@@ -17,33 +15,6 @@ HannBasis(width=1.) = FiniteBasisFunction(x -> begin
     # normalized integral would require pre-factor 2/width
     cos(pi*x/2/width)^2
 end, width)
-
-function kaiser(x, alpha, width) 
-    besseli(0, pi*alpha*sqrt(1-(x/width)^2))/besseli(0, pi*alpha)
-end
-
-function KaiserBasis(width = 1.2; alpha = 3.5, samples=64) 
-    if samples < 2 # no approximation, e.g. with samples = 0
-        f = x -> kaiser(x, alpha, width)
-    else
-        # approximate for higher speed with linearly interpolated LUT
-        # the default of 64 samples results in errors of approximately < 0.3e-3
-        x = range(0, width, length=samples)
-        y = kaiser.(x, alpha, width)
-        itp = interpolate(y, BSpline(Linear()))
-        sitp = scale(itp, x)
-        f = x -> sitp(x) 
-        # evaluating these interpolations is somehow slow, as kaiser takes 10x longer than Hann. 
-        # But overall, that's not a big issue probably, since the difference between Hann and Kaiser is negligible when looking at the results. 
-        # So, we can probably take out the Kaiser window without much problems for my application
-    end
-
-    FiniteBasisFunction(x -> begin
-    x < 0 && error("undefined for negative values")
-    x > width && return 0.
-    f(x)
-    end, width)
-end
 
 function find_first_above_or_equal(cutoff, x::StepRangeLen)
     # this doesn't work for all cases - assert the right ones

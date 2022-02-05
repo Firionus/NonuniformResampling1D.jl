@@ -30,6 +30,19 @@ function find_last_below_or_equal(cutoff, x::StepRangeLen)
     return min(x.len, ind)
 end
 
+function find_last_below(cutoff, x::StepRangeLen)
+    # this doesn't work for all cases - assert the right ones
+    @assert Float64(x.step) > 0
+    @assert x.offset == 1
+    # basic math:
+    # y = x.ref + (i-x.offset)*x.step
+    # i = (y - x.ref)/x.step + x.offset
+    ind_float = (cutoff - x.ref)/x.step
+    ind = Int(floor(Float64(ind_float)|>prevfloat)) + x.offset
+    @assert ind >= 1 # none of the elements are below or equal the cutoff
+    return min(x.len, ind)
+end
+
 function regrid(xin::StepRangeLen, yin, xout,
     smoothing_function::FiniteBasisFunction = RectBasis(.5),
     )
@@ -58,11 +71,11 @@ function regrid(xin::StepRangeLen, yin, xout,
         input_start = slice_stop - slice_width*extent
         input_stop = slice_stop
         @assert input_start >= xin[1]
-        @assert input_stop <= xin[end]
+        @assert input_stop <= xin[end] "Not enough points at the end of the input"
 
         #find relevant input points
-        input_start_ind = find_first_above_or_equal(input_start, xin) # TODO if we always select or equal, we'll select values exactly on the output point twice and weigh them too heavily
-        input_stop_ind = find_last_below_or_equal(input_stop, xin)
+        input_start_ind = find_first_above_or_equal(input_start, xin) 
+        input_stop_ind = find_last_below(input_stop, xin)
         # require at least one point in the window
         @assert input_stop_ind >= input_start_ind
 
@@ -89,7 +102,7 @@ function regrid(xin::StepRangeLen, yin, xout,
         input_start = slice_start
         input_stop = slice_start + slice_width*extent
         @assert input_start >= xin[1]
-        @assert input_stop <= xin[end]
+        @assert input_stop <= xin[end] "Not enough points at the end of the input"
 
         input_start_ind = find_first_above_or_equal(input_start, xin)
         input_stop_ind = find_last_below_or_equal(input_stop, xin)

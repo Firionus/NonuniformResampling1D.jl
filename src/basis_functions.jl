@@ -1,3 +1,5 @@
+export FiniteBasisFunction, HannBasis, RectBasis
+
 struct FiniteBasisFunction{F<:Function, T<:Real}
     f::F # callback x::Real -> y::Real, x ∈ [0, Inf), 
     # y(0) should probably be 1 (current node at x=0) 

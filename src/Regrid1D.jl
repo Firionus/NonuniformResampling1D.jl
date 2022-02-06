@@ -6,8 +6,8 @@ include("range_utilities.jl")
 export regrid
 
 function regrid(xin::StepRangeLen, yin, xout,
-    smoothing_function::FiniteBasisFunction = RectBasis(.5);
-    required_input_points=4, upsampling_basis=HannBasis(2.) # TODO change upsampling default to Lanczos Basis
+    smoothing_function::FiniteBasisFunction = RectangularBasis();
+    required_input_points=4, upsampling_basis=LanczosBasis()
     )
     # allocate
     yout = Array{Float64, 1}(undef, length(xout))
@@ -57,12 +57,14 @@ function interpolate_point(xin, yin, xpoint, left_unit_width, right_unit_width, 
     input_points = input_stop_ind - input_start_ind + 1
     if input_points < required_input_points
         #upsample
+        #println("upsampling at $(xpoint) because only $(input_points) are in the input_range $(input_start) to $(input_stop)")
         @assert !ismissing(upsampling_basis) "Not enough input points and no upsampling basis"
         upsample_step = input_width/required_input_points
         input_x = range(input_start + upsample_step/2, step=upsample_step, length=required_input_points)
         in_step = Float64(xin.step)
         input_y = [interpolate_point(xin, yin, up_x, in_step, in_step, upsampling_basis) for up_x in input_x] 
         # TODO use buffer for upsampled values (length == required_input_values) that is allocated at a call to `regrid` instead of allocating every time
+        #println("upsampling done - continuing with weighted mean and data $(input_x) $(input_y)")
     else # don't upsample
         input_x = xin[input_start_ind:input_stop_ind]
         input_y = @view yin[input_start_ind:input_stop_ind]
@@ -125,7 +127,7 @@ function slice_weighted_mean(xpoint, slice_width, xin_points, yin_points, basis)
         x = xin_points[i]
         y = yin_points[i]
         rel_pos = abs(x - xpoint)/slice_width
-        win_value::Float64 = val(basis, rel_pos)
+        win_value::Float64 = basis_value(basis, rel_pos)
         win_acc += win_value
         val_acc += y*win_value
     end

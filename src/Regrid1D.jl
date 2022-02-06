@@ -1,8 +1,9 @@
 module Regrid1D
 
 include("basis_functions.jl")
+export HannBasis, RectBasis
 
-export regrid, HannBasis, RectBasis
+export regrid
 
 function find_first_above_or_equal(cutoff, x::StepRangeLen)
     # this doesn't work for all cases - assert the right ones
@@ -46,19 +47,15 @@ end
 function regrid(xin::StepRangeLen, yin, xout,
     smoothing_function::FiniteBasisFunction = RectBasis(.5),
     )
-    step = xin.step|>Float64
-
     # allocate
     yout = Array{Float64, 1}(undef, length(xout))
 
-
-    out_ind = 1
-
-
     # first slice
-    right_slice_width = max(step, xout[2] - xout[1])
+    right_slice_width = max(xin.step, xout[2] - xout[1])
     left_slice_width = right_slice_width
-
+    
+    out_ind = 1
+    
     while true
         yout[out_ind] = interpolate_point(xin, yin, xout[out_ind], left_slice_width, right_slice_width, smoothing_function)
 
@@ -67,9 +64,10 @@ function regrid(xin::StepRangeLen, yin, xout,
         out_ind > length(xout) && break
 
         if out_ind < length(xout) # keep previous slice width on last element
-            right_slice_width = max(step, xout[out_ind + 1] - xout[out_ind])
+            right_slice_width = max(xin.step, xout[out_ind + 1] - xout[out_ind])
         end
-        left_slice_width = max(step, xout[out_ind] - xout[out_ind - 1])
+        
+        left_slice_width = max(xin.step, xout[out_ind] - xout[out_ind - 1])
     end
 
     yout

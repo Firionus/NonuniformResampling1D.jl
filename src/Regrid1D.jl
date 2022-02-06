@@ -125,7 +125,7 @@ function slice_weighted_mean(xpoint, slice_width, xin_points, yin_points, basis)
         x = xin_points[i]
         y = yin_points[i]
         rel_pos = abs(x - xpoint)/slice_width
-        win_value::Float64 = basis.f(rel_pos)
+        win_value::Float64 = val(basis, rel_pos)
         win_acc += win_value
         val_acc += y*win_value
     end

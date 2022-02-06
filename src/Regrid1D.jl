@@ -46,10 +46,6 @@ end
 function regrid(xin::StepRangeLen, yin, xout,
     smoothing_function::FiniteBasisFunction = RectBasis(.5),
     )
-
-    # extent of smoothing function
-    extent = smoothing_function.width
-
     step = xin.step|>Float64
 
     # allocate
@@ -59,80 +55,83 @@ function regrid(xin::StepRangeLen, yin, xout,
     out_ind = 1
 
 
-    # virtual first slice
-    # TODO document that this results in nearest neighbor-like behavior when in_resolution < out_resolution
-    slice_width = max(step, xout[2] - xout[1]) 
-    slice_start = xout[1] - slice_width
-    slice_stop = xout[1]
-
+    # first slice
+    right_slice_width = max(step, xout[2] - xout[1])
+    left_slice_width = right_slice_width
 
     while true
-        # start with left slice
-        input_start = slice_stop - slice_width*extent
-        input_stop = slice_stop
-        @assert input_start >= xin[1]
-        @assert input_stop <= xin[end] "Not enough points at the end of the input"
+        yout[out_ind] = interpolate_point(xin, yin, xout[out_ind], left_slice_width, right_slice_width, smoothing_function)
 
-        #find relevant input points
-        input_start_ind = find_first_above_or_equal(input_start, xin) 
-        input_stop_ind = find_last_below(input_stop, xin)
-        # require at least one point in the window
-        @assert input_stop_ind >= input_start_ind
-
-        val_acc = 0.
-        win_acc = 0.
-        for input_ind in input_start_ind:input_stop_ind
-            x = xin[input_ind]
-            rel_pos = (input_stop - x)/slice_width
-            win_value::Float64 = smoothing_function.f(rel_pos)
-            win_acc += win_value
-            val_acc += yin[input_ind]*win_value
-        end
-        # assing on left slice
-        yout[out_ind] = val_acc / win_acc / 2 # normalization
-
-        # left slice done
-        # now right slice
-        if out_ind < xout|>length # keep previous slice width on last element
-            slice_width = max(step, xout[out_ind + 1] - xout[out_ind])
-        end
-        slice_start = xout[out_ind]
-        slice_stop = xout[out_ind] + slice_width
-
-        input_start = slice_start
-        input_stop = slice_start + slice_width*extent
-        @assert input_start >= xin[1]
-        @assert input_stop <= xin[end] "Not enough points at the end of the input"
-
-        input_start_ind = find_first_above_or_equal(input_start, xin)
-        input_stop_ind = find_last_below_or_equal(input_stop, xin)
-        # require at least one point in the window
-        @assert input_stop_ind >= input_start_ind "input range $(input_start) to $(input_stop) does not contain at least one point"
-
-        val_acc::Float64 = 0.
-        win_acc::Float64 = 0.
-        for input_ind in input_start_ind:input_stop_ind
-            x = xin[input_ind]
-            rel_pos = (x - input_start)/slice_width
-            win_value::Float64 = smoothing_function.f(rel_pos)
-            win_acc += win_value
-            val_acc += yin[input_ind]*win_value
-        end
-        # add on right slice
-        yout[out_ind] += val_acc / win_acc / 2 # normalization
-
-        # right slice done
-        # prepare next left slice
-
+        # prepare next point
         out_ind += 1
         out_ind > length(xout) && break
 
-        slice_width = max(step, xout[out_ind] - xout[out_ind - 1])
-        slice_start = xout[out_ind] - slice_width
-        slice_stop = xout[out_ind]
+        if out_ind < length(xout) # keep previous slice width on last element
+            right_slice_width = max(step, xout[out_ind + 1] - xout[out_ind])
+        end
+        left_slice_width = max(step, xout[out_ind] - xout[out_ind - 1])
     end
 
     yout
+end
+
+function interpolate_point(xin, yin, xpoint, left_unit_width, right_unit_width, basis::FiniteBasisFunction)
+    # start with left slice
+    slice_width = left_unit_width
+    slice_start = xpoint - left_unit_width
+    slice_stop = xpoint
+
+    input_width = slice_width*basis.width
+    input_start = slice_stop - input_width
+    input_stop = slice_stop
+    @assert input_start >= xin[1]
+    @assert input_stop <= xin[end] "Not enough points at the end of the input"
+
+    #find relevant input points
+    input_start_ind = find_first_above_or_equal(input_start, xin) 
+    input_stop_ind = find_last_below(input_stop, xin)
+    # require at least one point in the window
+    @assert input_stop_ind >= input_start_ind
+
+    val_acc = 0.
+    win_acc = 0.
+    for input_ind in input_start_ind:input_stop_ind
+        x = xin[input_ind]
+        rel_pos = (input_stop - x)/slice_width
+        win_value::Float64 = basis.f(rel_pos)
+        win_acc += win_value
+        val_acc += yin[input_ind]*win_value
+    end
+    left_slice_contribution = val_acc / win_acc / 2 # normalization
+
+    # right slice
+    slice_width = right_unit_width
+    slice_start = xpoint
+    slice_stop = xpoint + slice_width
+
+    input_width = slice_width*basis.width
+    input_start = slice_start
+    input_stop = slice_start + input_width
+    @assert input_start >= xin[1]
+    @assert input_stop <= xin[end] "Not enough points at the end of the input"
+
+    input_start_ind = find_first_above_or_equal(input_start, xin)
+    input_stop_ind = find_last_below_or_equal(input_stop, xin)
+    # require at least one point in the window
+    @assert input_stop_ind >= input_start_ind "input range $(input_start) to $(input_stop) does not contain at least one point"
+
+    val_acc::Float64 = 0.
+    win_acc::Float64 = 0.
+    for input_ind in input_start_ind:input_stop_ind
+        x = xin[input_ind]
+        rel_pos = (x - input_start)/slice_width
+        win_value::Float64 = basis.f(rel_pos)
+        win_acc += win_value
+        val_acc += yin[input_ind]*win_value
+    end
+    right_slice_contribution = val_acc / win_acc / 2
+    
+    return left_slice_contribution + right_slice_contribution
 end
 
 end # module

@@ -47,11 +47,12 @@ end
 function regrid(xin::StepRangeLen, yin, xout,
     smoothing_function::FiniteBasisFunction = RectBasis(.5),
     )
+    in_step = Float64(xin.step)
     # allocate
     yout = Array{Float64, 1}(undef, length(xout))
 
     # first slice
-    right_slice_width = max(xin.step, xout[2] - xout[1])
+    right_slice_width = max(in_step, xout[2] - xout[1])
     left_slice_width = right_slice_width
     
     out_ind = 1
@@ -64,10 +65,10 @@ function regrid(xin::StepRangeLen, yin, xout,
         out_ind > length(xout) && break
 
         if out_ind < length(xout) # keep previous slice width on last element
-            right_slice_width = max(xin.step, xout[out_ind + 1] - xout[out_ind])
+            right_slice_width = max(in_step, xout[out_ind + 1] - xout[out_ind])
         end
-        
-        left_slice_width = max(xin.step, xout[out_ind] - xout[out_ind - 1])
+
+        left_slice_width = max(in_step, xout[out_ind] - xout[out_ind - 1])
     end
 
     yout
@@ -76,12 +77,10 @@ end
 function interpolate_point(xin, yin, xpoint, left_unit_width, right_unit_width, basis::FiniteBasisFunction)
     # start with left slice
     slice_width = left_unit_width
-    slice_start = xpoint - left_unit_width
-    slice_stop = xpoint
 
     input_width = slice_width*basis.width
-    input_start = slice_stop - input_width
-    input_stop = slice_stop
+    input_start = xpoint - input_width
+    input_stop = xpoint
     @assert input_start >= xin[1]
     @assert input_stop <= xin[end] "Not enough points at the end of the input"
 
@@ -91,45 +90,44 @@ function interpolate_point(xin, yin, xpoint, left_unit_width, right_unit_width, 
     # require at least one point in the window
     @assert input_stop_ind >= input_start_ind
 
-    val_acc = 0.
-    win_acc = 0.
-    for input_ind in input_start_ind:input_stop_ind
-        x = xin[input_ind]
-        rel_pos = (input_stop - x)/slice_width
-        win_value::Float64 = basis.f(rel_pos)
-        win_acc += win_value
-        val_acc += yin[input_ind]*win_value
-    end
-    left_slice_contribution = val_acc / win_acc / 2 # normalization
+    input_x = xin[input_start_ind:input_stop_ind]
+    input_y = @view yin[input_start_ind:input_stop_ind]
+    left_slice_contribution = .5*slice_weighted_mean(xpoint, slice_width, input_x, input_y, basis)
 
     # right slice
     slice_width = right_unit_width
-    slice_start = xpoint
-    slice_stop = xpoint + slice_width
 
     input_width = slice_width*basis.width
-    input_start = slice_start
-    input_stop = slice_start + input_width
+    input_start = xpoint
+    input_stop = xpoint + input_width
     @assert input_start >= xin[1]
     @assert input_stop <= xin[end] "Not enough points at the end of the input"
 
+    #find relevant input points
     input_start_ind = find_first_above_or_equal(input_start, xin)
     input_stop_ind = find_last_below_or_equal(input_stop, xin)
     # require at least one point in the window
     @assert input_stop_ind >= input_start_ind "input range $(input_start) to $(input_stop) does not contain at least one point"
 
-    val_acc::Float64 = 0.
-    win_acc::Float64 = 0.
-    for input_ind in input_start_ind:input_stop_ind
-        x = xin[input_ind]
-        rel_pos = (x - input_start)/slice_width
-        win_value::Float64 = basis.f(rel_pos)
-        win_acc += win_value
-        val_acc += yin[input_ind]*win_value
-    end
-    right_slice_contribution = val_acc / win_acc / 2
+    input_x = xin[input_start_ind:input_stop_ind]
+    input_y = @view yin[input_start_ind:input_stop_ind]
+    right_slice_contribution = .5*slice_weighted_mean(xpoint, slice_width, input_x, input_y, basis)
     
     return left_slice_contribution + right_slice_contribution
+end
+
+function slice_weighted_mean(xpoint, slice_width, xin_points, yin_points, basis)
+    val_acc::Float64 = 0.
+    win_acc::Float64 = 0.
+    for i in eachindex(xin_points)
+        x = xin_points[i]
+        y = yin_points[i]
+        rel_pos = abs(x - xpoint)/slice_width
+        win_value::Float64 = basis.f(rel_pos)
+        win_acc += win_value
+        val_acc += y*win_value
+    end
+    return val_acc / win_acc # normalization
 end
 
 end # module

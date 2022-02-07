@@ -16,6 +16,7 @@ function regrid(xin::StepRangeLen, yin, xout,
 
     # first slice
     right_slice_width = xout[2] - xout[1]
+    @assert right_slice_width > 0 "x of output must be strict monotonically increasing"
     left_slice_width = right_slice_width
     
     out_ind = 1
@@ -32,6 +33,7 @@ function regrid(xin::StepRangeLen, yin, xout,
 
         if out_ind < length(xout) # keep previous slice width on last element
             right_slice_width = xout[out_ind + 1] - xout[out_ind]
+            @assert right_slice_width > 0 "x of output must be strict monotonically increasing"
         end
 
         left_slice_width = xout[out_ind] - xout[out_ind - 1]

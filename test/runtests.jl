@@ -67,8 +67,8 @@ using Statistics
         # first point: from 1.8 to 4.6 -> 2 3 | 4
         # second points: from 4.6 to 7.4 -> 5 |6 7 (middle one should be counted to the higher interval)
         @test regrid(xin, yin, xout, required_input_points=1) == [
-            mean([mean(yin[2:3]), yin[4]]), 
-            mean([mean(yin[5:5]), mean(yin[6:7])])
+            mean(yin[2:4]), 
+            mean(yin[5:7])
             ]
     end
 

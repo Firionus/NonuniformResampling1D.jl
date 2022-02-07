@@ -5,6 +5,8 @@ include("range_utilities.jl")
 
 export regrid
 
+# TODO better errors when xout is not strictly monotonic (check in each iteration)
+
 function regrid(xin::StepRangeLen, yin, xout,
     smoothing_function::FiniteBasisFunction = RectangularBasis();
     required_input_points=4, upsampling_basis=LanczosBasis()
@@ -70,7 +72,7 @@ function interpolate_point(xin, yin, xpoint, left_unit_width, right_unit_width, 
         input_y = @view yin[input_start_ind:input_stop_ind]
     end
 
-    left_slice_contribution = .5*slice_weighted_mean(xpoint, slice_width, input_x, input_y, basis)
+    left_slice_contribution = slice_weighted_mean(xpoint, slice_width, input_x, input_y, basis)
 
     # right slice
     slice_width = right_unit_width
@@ -98,9 +100,11 @@ function interpolate_point(xin, yin, xpoint, left_unit_width, right_unit_width, 
         input_y = @view yin[input_start_ind:input_stop_ind]
     end
 
-    right_slice_contribution = .5*slice_weighted_mean(xpoint, slice_width, input_x, input_y, basis)
+    right_slice_contribution = slice_weighted_mean(xpoint, slice_width, input_x, input_y, basis)
     
-    return left_slice_contribution + right_slice_contribution
+    contributions = left_slice_contribution .+ right_slice_contribution
+
+    return contributions[1]/contributions[2]
 end
 
 function prepare_input_or_upsample()
@@ -134,7 +138,7 @@ function slice_weighted_mean(xpoint, slice_width, xin_points, yin_points, basis)
     if win_acc <= 0
         error("shouldn't happen")
     end
-    return val_acc / win_acc # normalization
+    return (val_acc, win_acc)
 end
 
 end # module

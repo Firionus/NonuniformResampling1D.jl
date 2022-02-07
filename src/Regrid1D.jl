@@ -137,9 +137,7 @@ function slice_weighted_mean(xpoint, slice_width, xin_points, yin_points, basis)
         win_acc += win_value
         val_acc += y*win_value
     end
-    if win_acc <= 0
-        error("shouldn't happen")
-    end
+    @assert win_acc > 0 "Slice weight should be bigger zero"
     return (val_acc, win_acc)
 end
 

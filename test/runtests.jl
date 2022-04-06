@@ -83,4 +83,21 @@ using Statistics
         @test all(.!isnan.(output))
     end
 
+    @testset "Balanced Average for Asymmetric Windows" begin
+        yin = [9, 7, 8, 7, 1, 2, 4, 1, 9, 8, 5, 3]
+        xin = 1.:12.
+        xout = [2.9, 3.8, 7.5] # middle point highly asymmetric
+        output = regrid(xin, yin, xout, RectangularBasis(1.), required_input_points=1)
+        @test output[2] == mean(yin[3:7])
+        println("without upsampling: ", output[2])
+
+        output_asy_up = regrid(xin, yin, xout, RectangularBasis(1.), 
+        required_input_points=2, upsampling_basis=TriangularBasis(1.)
+        )
+        println("with upsampling: ", output_asy_up[2])
+        @test abs(output_asy_up[2] - output[2]) < .2 # change shouldn't be that big from enabling upsampling
+        # fails because upsampling to 4 points to the left of the out-point weighs the 
+        # left point too much compared to the right points
+    end
+
 end

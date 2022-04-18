@@ -88,7 +88,7 @@ using Statistics
         xin = 1.:12.
         xout = [2.9, 3.8, 7.5] # middle point highly asymmetric
         output = regrid(xin, yin, xout, RectangularBasis(1.), required_input_points=1)
-        @test output[2] == mean(yin[3:7])
+        @test output[2] == mean(yin[3:7]) # value without upsampling on one side
         println("without upsampling: ", output[2])
 
         output_asy_up = regrid(xin, yin, xout, RectangularBasis(1.), 
@@ -98,6 +98,16 @@ using Statistics
         @test abs(output_asy_up[2] - output[2]) < .2 # change shouldn't be that big from enabling upsampling
         # fails because upsampling to 4 points to the left of the out-point weighs the 
         # left point too much compared to the right points
+    end
+
+    @testset "Output Value Does Not Jump when Output Point Moves over Input Point" begin
+        yin = [9, 9, 2, 1, 6, 4, 7, 3, 6, 4, 7]
+        xin = 1.:11.
+        # output point left of index 6
+        output_left = regrid(xin, yin, [3.9, 5.9, 7.9], RectangularBasis(1.), required_input_points=1)
+        # output point right of index 6
+        output_right = regrid(xin, yin, [3.9, 6.1, 7.9], RectangularBasis(1.), required_input_points=1)
+        @test output_left[2] == output_right[2]
     end
 
 end

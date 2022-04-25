@@ -1,6 +1,7 @@
 using Regrid1D
 using Test
 using Statistics
+using Interpolations
 
 @testset "Regrid1D Tests" begin
 
@@ -86,23 +87,48 @@ using Statistics
     @testset "Balanced Average for Asymmetric Windows" begin
         yin = [9, 7, 8, 7, 1, 2, 4, 1, 9, 8, 5, 3]
         #      1--2-*3-*4--5--6--7-*8--9--10-11-12      (input axis and output points as "*")
+        #            ll*rrrrrrrrrrr                     (point under test)
         xin = 1.:12.
         xout = [2.9, 3.8, 7.5] # middle point highly asymmetric
         output = regrid(xin, yin, xout, RectangularBasis(1.), required_input_points=1)
-        @test output[2] == mean(yin[3:7]) # value without upsampling on one side
-        # TODO comment out:
-        println("without upsampling: ", output[2])
+        @test output[2] == mean(yin[3:7]) # value without upsampling on one side is just a mean
 
-        output_asymmetric_upsampling = regrid(
-            xin, yin, xout, RectangularBasis(1.), 
-            required_input_points=2, upsampling_basis=TriangularBasis(1.)
-        )
-        # TODO comment out:
-        println("with upsampling: ", output_asymmetric_upsampling[2])
-        @test abs(output_asymmetric_upsampling[2] - output[2]) < .2 # change shouldn't be that big from enabling upsampling
-        # TODO change to relative difference better than 5% (?)
-        # fails because upsampling to 4 points to the left of the out-point weighs the 
-        # left point too much compared to the right points
+        output_asymmetric_upsampling = regrid(xin, yin, xout, RectangularBasis(1.), 
+            required_input_points=2, upsampling_basis=TriangularBasis(1.))
+
+        # expected: left slice only contains 1 point, but 2 are required
+        # so both slices should be upsampled with a step of 0.9/2 = 0.45
+        # upsampling positions therefore are: [3.125, 3.575] (left) and 
+        # [4.025, 4.475, 4.925, 5.375, 5.825, 6.275, 6.725, 7.175] (right)
+        # the mean of all those points, linearly interpolated, should be the result
+        itp = interpolate(yin, BSpline(Linear()))
+        expected_positions = [3.125, 3.575, 4.025, 4.475, 4.925, 5.375, 5.825, 6.275, 6.725, 7.175]
+
+        @test mean(itp(expected_positions)) ≈ output_asymmetric_upsampling[2]
+
+        # relative change from upsampling should be smaller than 10 %
+        @test abs(output_asymmetric_upsampling[2] - output[2])/output[2] < .1
+
+        # compare with large oversampling
+        big_oversampling = regrid(xin, yin, xout, RectangularBasis(1.), 
+        required_input_points=9, upsampling_basis=TriangularBasis(1.))[2]
+        @test abs(output_asymmetric_upsampling[2] - big_oversampling)/big_oversampling < .01
+    end
+
+    @testset "Large Oversampling Value Should Not Error" begin
+        # TODO same example as above - consolidate?
+        yin = [9, 7, 8, 7, 1, 2, 4, 1, 9, 8, 5, 3]
+        xin = 1.:12.
+        xout = [2.9, 3.8, 7.5] # middle point highly asymmetric
+
+        result8 = regrid(xin, yin, xout, RectangularBasis(1.), 
+        required_input_points=8, upsampling_basis=TriangularBasis(1.))[2]
+
+        result32 = regrid(xin, yin, xout, RectangularBasis(1.), 
+        required_input_points=32, upsampling_basis=TriangularBasis(1.))[2]
+
+        # results should be very comparable
+        @test abs(result8 - result32)/result32 < .001
     end
 
     @testset "Output Value Does Not Jump when Output Point Moves over Input Point" begin

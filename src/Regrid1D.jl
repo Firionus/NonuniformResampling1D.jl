@@ -61,8 +61,9 @@ function SliceContribution(slice_width, basis::FiniteBasisFunction, xpoint, xin,
         input_start = xpoint
         input_stop = xpoint + input_width
     end
-    @assert input_start >= xin[1] "Not enough points at the beginning of the input"
-    @assert input_stop <= xin[end] "Not enough points at the end of the input"
+    @assert input_start > xin[1] - Float64(xin.step) "Not enough points at the beginning of the input"
+    @assert input_stop < xin[end] + Float64(xin.step) "Not enough points at the end of the input"
+    # TODO Float64(xin.step) is calculated again and again in different places -> bad?
 
     #find relevant input indices
     input_start_ind = find_first_above_or_equal(input_start, xin) 

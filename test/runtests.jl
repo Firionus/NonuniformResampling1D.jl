@@ -141,4 +141,21 @@ using Interpolations
         @test output_left[2] == output_right[2]
     end
 
+    # TODO test doesn't work properly yet
+    @testset "Error When Not Enough Points at Beginning or End" begin
+        yin = [9, 7, 8, 7, 1, 2, 4, 1, 9, 8, 5, 3]
+        xin = 1.:12.
+
+        # Just enough points at beginning
+        regrid(xin, yin, [2., 3.9999999999999], RectangularBasis(1.), required_input_points=1)
+
+        # not enough points (the point at index -1 would be needed but does not exist)
+        @test_throws Exception regrid(xin, yin, [2., 4.], RectangularBasis(1.), required_input_points=1)
+
+        # Just enough points at end
+        regrid(xin, yin, [9.00000000000001, 11.], RectangularBasis(1.), required_input_points=1)
+
+        # not enough points (the point at index 13 would be needed but does not exist)
+        @test_throws Exception regrid(xin, yin, [9., 11.], RectangularBasis(1.), required_input_points=1)
+    end
 end

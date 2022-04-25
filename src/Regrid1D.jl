@@ -6,7 +6,7 @@ include("range_utilities.jl")
 export regrid
 
 # TODO better errors when xout is not strictly monotonic (check in each iteration)
-
+# TODO change from required_input_points per slice to required_input_points per unit width
 function regrid(xin::StepRangeLen, yin, xout,
     smoothing_function::FiniteBasisFunction = RectangularBasis();
     required_input_points=4, upsampling_basis=LanczosBasis()
@@ -42,87 +42,85 @@ function regrid(xin::StepRangeLen, yin, xout,
     yout
 end
 
+struct SliceContribution
+        slice_width
+        input_width
+        input_start
+        input_stop
+        input_start_ind
+        input_stop_ind
+        upsampling_required
+end
+
+function SliceContribution(slice_width, basis::FiniteBasisFunction, xpoint, xin, left::Bool, required_input_points)
+    input_width = slice_width*basis.width
+    if left
+        input_start = xpoint - input_width
+        input_stop = xpoint
+    else
+        input_start = xpoint
+        input_stop = xpoint + input_width
+    end
+    @assert input_start >= xin[1] "Not enough points at the beginning of the input"
+    @assert input_stop <= xin[end] "Not enough points at the end of the input"
+
+    #find relevant input indices
+    input_start_ind = find_first_above_or_equal(input_start, xin) 
+    input_stop_ind = if left find_last_below(input_stop, xin) else find_last_below_or_equal(input_stop, xin) end
+
+    input_points = input_stop_ind - input_start_ind + 1
+    upsampling_required = input_points < required_input_points
+
+    SliceContribution(
+        slice_width,
+        input_width,
+        input_start,
+        input_stop,
+        input_start_ind,
+        input_stop_ind,
+        upsampling_required,
+    )
+end
+
+# TODO is it called unit or slice? What's what? Make consistent and document!
 function interpolate_point(xin, yin, xpoint, left_unit_width, right_unit_width, basis::FiniteBasisFunction;
     required_input_points=1, upsampling_basis=missing,
     )
-    # start with left slice
-    slice_width = left_unit_width
 
-    input_width = slice_width*basis.width
-    input_start = xpoint - input_width
-    input_stop = xpoint
-    @assert input_start >= xin[1] "Not enough points at the beginning of the input"
-    @assert input_stop <= xin[end] "Not enough points at the end of the input"
+    left = SliceContribution(left_unit_width, basis, xpoint, xin, true, required_input_points)
+    right = SliceContribution(right_unit_width, basis, xpoint, xin, false, required_input_points)
 
-    #find relevant input points
-    input_start_ind = find_first_above_or_equal(input_start, xin) 
-    input_stop_ind = find_last_below(input_stop, xin)
-
-    input_points = input_stop_ind - input_start_ind + 1
-    if input_points < required_input_points
-        #upsample
-        #println("upsampling at $(xpoint) because only $(input_points) are in the input_range $(input_start) to $(input_stop)")
-        @assert !ismissing(upsampling_basis) "Not enough input points and no upsampling basis"
-        upsample_step = input_width/required_input_points
-        input_x = range(input_start + upsample_step/2, step=upsample_step, length=required_input_points)
-        in_step = Float64(xin.step)
-        input_y = [interpolate_point(xin, yin, up_x, in_step, in_step, upsampling_basis) for up_x in input_x] 
-        # TODO use buffer for upsampled values (length == required_input_values) that is allocated at a call to `regrid` instead of allocating every time
-        #println("upsampling done - continuing with weighted mean and data $(input_x) $(input_y)")
-    else # don't upsample
-        input_x = xin[input_start_ind:input_stop_ind]
-        input_y = @view yin[input_start_ind:input_stop_ind]
+    if left.upsampling_required || right.upsampling_required
+        # upsample both slices, even if only required for one of them
+        @assert !ismissing(upsampling_basis) "Interpolation required but no upsampling basis given"
+        upsample_step = min(left.input_width, right.input_width)/required_input_points
+        left_x, left_y = upsample_prepare_input(left, xin, yin, upsample_step, upsampling_basis)
+        right_x, right_y = upsample_prepare_input(right, xin, yin, upsample_step, upsampling_basis)
+    else
+        # neither of the slices needs upsampling
+        left_x, left_y = prepare_input(left, xin, yin)
+        right_x, right_y = prepare_input(right, xin, yin)
     end
 
-    left_slice_contribution = slice_weighted_mean(xpoint, slice_width, input_x, input_y, basis)
+    left_slice_contribution = slice_weighted_mean(xpoint, left_unit_width, left_x, left_y, basis)
+    right_slice_contribution = slice_weighted_mean(xpoint, right_unit_width, right_x, right_y, basis)
 
-    # right slice
-    slice_width = right_unit_width
-
-    input_width = slice_width*basis.width
-    input_start = xpoint
-    input_stop = xpoint + input_width
-    @assert input_start >= xin[1] "Not enough points at the beginning of the input"
-    @assert input_stop <= xin[end] "Not enough points at the end of the input"
-
-    #find relevant input points
-    input_start_ind = find_first_above_or_equal(input_start, xin)
-    input_stop_ind = find_last_below_or_equal(input_stop, xin)
-
-    input_points = input_stop_ind - input_start_ind + 1
-    if input_points < required_input_points
-        #upsample
-        @assert !ismissing(upsampling_basis) "Not enough input points and no upsampling basis"
-        upsample_step = input_width/required_input_points
-        input_x = range(input_start + upsample_step/2, step=upsample_step, length=required_input_points)
-        in_step = Float64(xin.step)
-        input_y = [interpolate_point(xin, yin, xpoint, in_step, in_step, upsampling_basis) for xpoint in input_x] 
-    else # don't upsample
-        input_x = xin[input_start_ind:input_stop_ind]
-        input_y = @view yin[input_start_ind:input_stop_ind]
-    end
-
-    right_slice_contribution = slice_weighted_mean(xpoint, slice_width, input_x, input_y, basis)
-    
-    contributions = left_slice_contribution .+ right_slice_contribution
+    contributions = left_slice_contribution .+ right_slice_contribution # TODO this easy, but cryptic to understand. Make more explicit. 
 
     return contributions[1]/contributions[2]
 end
 
-function prepare_input_or_upsample()
-    input_points = input_stop_ind - input_start_ind + 1
-    if input_points < required_input_points
-        #upsample
-        @assert !ismissing(upsampling_basis) "Not enough input points and no upsampling basis"
-        upsample_step = input_width/required_input_points
-        input_x = range(input_start + upsample_step/2, step=upsample_step, length=required_input_points)
-        in_step = Float64(xin.step)
-        input_y = [interpolate_point(xin, yin, xpoint, in_step, in_step, HannBasis(3.)) for xpoint in input_x] 
-        # TODO change to Lanczos Basis
-    else # don't upsample
-        input_x = xin[input_start_ind:input_stop_ind]
-        input_y = @view yin[input_start_ind:input_stop_ind]
-    end
+function prepare_input(sc::SliceContribution, xin, yin)
+    input_x = xin[sc.input_start_ind:sc.input_stop_ind]
+    input_y = @view yin[sc.input_start_ind:sc.input_stop_ind]
+    return (input_x, input_y)
+end
+
+function upsample_prepare_input(sc::SliceContribution, xin, yin, upsample_step, upsampling_basis)
+    input_x = range(sc.input_start + upsample_step/2, step=upsample_step, stop=sc.input_stop)
+    in_step = Float64(xin.step)
+    input_y = [interpolate_point(xin, yin, up_x, in_step, in_step, upsampling_basis) for up_x in input_x] 
+    # TODO use buffer for upsampled values (length == required_input_values) that is allocated at a call to `regrid` instead of allocating every time
     return (input_x, input_y)
 end
 

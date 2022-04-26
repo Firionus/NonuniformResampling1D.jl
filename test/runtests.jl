@@ -141,7 +141,6 @@ using Interpolations
         @test output_left[2] == output_right[2]
     end
 
-    # TODO test doesn't work properly yet
     @testset "Error When Not Enough Points at Beginning or End" begin
         yin = [9, 7, 8, 7, 1, 2, 4, 1, 9, 8, 5, 3]
         xin = 1.:12.

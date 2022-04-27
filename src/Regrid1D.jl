@@ -69,7 +69,6 @@ function Slice(unit_width, basis::FiniteBasisFunction, xpoint, xin, left::Bool, 
     end
     @assert start > xin[1] - Float64(xin.step) "Not enough points at the beginning of the input"
     @assert stop < xin[end] + Float64(xin.step) "Not enough points at the end of the input"
-    # TODO Float64(xin.step) is calculated again and again in different places -> bad?
 
     #find relevant input indices
     start_ind = find_first_above_or_equal(start, xin) 
@@ -124,7 +123,6 @@ function upsample_prepare_input(slice::Slice, xin, yin, upsample_step, upsamplin
     input_x = range(slice.start + upsample_step/2, step=upsample_step, stop=slice.stop)
     in_step = Float64(xin.step)
     input_y = [interpolate_point(xin, yin, up_x, in_step, in_step, upsampling_basis) for up_x in input_x] 
-    # TODO use buffer for upsampled values (length == required_input_values) that is allocated at a call to `regrid` instead of allocating every time
     return (input_x, input_y)
 end
 

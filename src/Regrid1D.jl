@@ -108,12 +108,10 @@ function interpolate_point(xin, yin, xpoint, left_unit_width, right_unit_width, 
         right_x, right_y = prepare_input(right, xin, yin)
     end
 
-    left_slice_contribution = slice_weighted_mean(xpoint, left_unit_width, left_x, left_y, basis)
-    right_slice_contribution = slice_weighted_mean(xpoint, right_unit_width, right_x, right_y, basis)
+    left_val_acc, left_win_acc = slice_weighted_mean(xpoint, left_unit_width, left_x, left_y, basis)
+    right_val_acc, right_win_acc = slice_weighted_mean(xpoint, right_unit_width, right_x, right_y, basis)
 
-    contributions = left_slice_contribution .+ right_slice_contribution # TODO this easy, but cryptic to understand. Make more explicit. 
-
-    return contributions[1]/contributions[2]
+    return (left_val_acc + right_val_acc)/(left_win_acc + right_win_acc)
 end
 
 function prepare_input(sc::SliceContribution, xin, yin)

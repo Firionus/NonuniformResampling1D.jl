@@ -97,7 +97,7 @@ end
     @test output_left[2] == output_right[2]
 end
 
-@testset "Error When Not Enough Points at Beginning or End" begin
+@testset "Error When not Enough Points at Beginning or End" begin
     # Just enough points at beginning
     regrid(xin, yin, [2., 3.9999999999999], RectangularBasis(1.), 
         required_input_points=1)
@@ -113,4 +113,36 @@ end
     # not enough points (the point at index 13 would be needed but does not exist)
     @test_throws Exception regrid(xin, yin, [9., 11.], RectangularBasis(1.), 
         required_input_points=1)
+end
+
+@testset "xout not Monotonically Increasing Throws Error" begin
+    # not monotonic
+    @test_throws(
+        ArgumentError("xout must be increasing everywhere. Violated between index 2 and 3: 6.5 >= 6.0"),
+        regrid(xin, yin, [4.5, 6.5, 6., 8.5]))
+
+    # monotonic, but not strict
+    @test_throws(
+        ArgumentError("xout must be increasing everywhere. Violated between index 2 and 3: 6.5 >= 6.5"),
+        regrid(xin, yin, [4.5, 6.5, 6.5, 8.5]))
+
+    # not monotonic at beginning
+    @test_throws(
+        ArgumentError("xout must be increasing everywhere. Violated between index 1 and 2: 4.5 >= 3.5"),
+        regrid(xin, yin, [4.5, 3.5, 6., 8.5]))
+    
+    # not strict monotonic at beginning
+    @test_throws(
+        ArgumentError("xout must be increasing everywhere. Violated between index 1 and 2: 4.5 >= 4.5"),
+        regrid(xin, yin, [4.5, 4.5, 6., 8.5]))
+    
+    # not monotonic at end
+    @test_throws(
+        ArgumentError("xout must be increasing everywhere. Violated between index 3 and 4: 6.0 >= 5.5"),
+        regrid(xin, yin, [4.5, 5., 6., 5.5]))
+
+    # not strict monotonic at end
+    @test_throws(
+        ArgumentError("xout must be increasing everywhere. Violated between index 3 and 4: 6.0 >= 6.0"),
+        regrid(xin, yin, [4.5, 5., 6., 6.]))
 end

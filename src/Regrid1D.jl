@@ -14,7 +14,7 @@ function regrid(xin::StepRangeLen, yin, xout,
     # allocate
     yout = Array{Float64, 1}(undef, length(xout))
 
-    # for first unit, assume left unit width to be equal to right unit width
+    # first unit
     out_ind = 1
     right_unit_width = calculate_right_unit_width(xout, out_ind)
     left_unit_width = right_unit_width
@@ -26,14 +26,13 @@ function regrid(xin::StepRangeLen, yin, xout,
         upsampling_basis=upsampling_basis)
 
         # prepare next point
+        left_unit_width = right_unit_width # next left unit width is the last right unit width
         out_ind += 1
         out_ind > length(xout) && break
 
         if out_ind < length(xout) # keep previous slice width on last element
             right_unit_width = calculate_right_unit_width(xout, out_ind)
         end
-
-        left_unit_width = xout[out_ind] - xout[out_ind - 1] # TODO isn't this just the last right_unit_width? Do we have to calculate again?
     end
 
     yout

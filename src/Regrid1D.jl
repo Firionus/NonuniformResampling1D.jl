@@ -5,6 +5,10 @@ include("range_utilities.jl")
 
 export regrid
 
+function regrid(xin::AbstractRange, yin, xout, smoothing_function=RectangularBasis(); kwargs...)
+    regrid(StepRangeLen(xin), yin, xout, smoothing_function, kwargs...)
+end
+
 function regrid(xin::StepRangeLen, yin, xout,
     smoothing_function::FiniteBasisFunction = RectangularBasis();
     required_points_per_slice::Integer=Int(round(4 * smoothing_function.width)), 

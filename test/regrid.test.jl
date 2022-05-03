@@ -217,5 +217,8 @@ end
     required_points_per_slice=1)
 end
 
-# TODO this should work without MethodError
-# regrid(1:3, [2.,4.,5.], [1.1, 2.2])
+@testset "Conversion from UnitRange to StepRangeLen" begin
+    @test regrid(xin, yin, [4.2, 5.5]) == regrid(1:12, yin, [4.2, 5.5])
+    @test_throws MethodError regrid(xin, yin) # check this dispatch isn't recursive
+    @test_throws MethodError regrid(xin, yin, [2.2, 3.1]; abc=12) # check this dispatch isn't recursive
+end

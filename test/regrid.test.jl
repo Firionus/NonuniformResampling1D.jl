@@ -190,4 +190,20 @@ end
     @test no_interpolation[1] == mean(yin[1:4])
     @test no_interpolation[2] == mean(yin[5:7])
 end
-# TODO test what happens when 0 or -1 are used for required_points_per_slice
+
+@testset "Strange required_points_per_slice Values" begin
+    # disallow values smaller than 0, because slices without values in them do
+    # not contribute anything, so the value of a point might become undefined
+    # without upsampling, which then is never triggered. If high performance
+    # like this is desired, required_points_per_slice=1 should be used with
+    # nearest neighbor upsampling, i.e. upsampling_basis=Rect(.5)
+    @test_throws AssertionError regrid(xin, yin, [4.5, 7.7], required_points_per_slice=0)
+    @test_throws AssertionError regrid(xin, yin, [4.5, 7.7], required_points_per_slice=-1)
+    # disallow float values, because they result in discontinuous values with
+    # the upsampling algorithm, i.e. the outputs values with 4.5 are very
+    # different from 4 or 5
+    @test_throws TypeError regrid(xin, yin, [4.5, 7.7], required_points_per_slice=4.5)
+end
+
+# TODO test that basis=Rect(0.), upsampling_basis=Rect(.5) and required_points_per_slice=1
+# results in nearest neighbor behavior

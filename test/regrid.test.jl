@@ -216,3 +216,6 @@ end
     upsampling_basis=RectangularBasis(1 - eps(1.)), 
     required_points_per_slice=1)
 end
+
+# TODO this should work without MethodError
+# regrid(1:3, [2.,4.,5.], [1.1, 2.2])

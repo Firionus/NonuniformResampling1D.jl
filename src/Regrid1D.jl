@@ -72,9 +72,8 @@ function Slice(unit_width, basis::FiniteBasisFunction, xpoint, xin, left::Bool, 
         start = xpoint
         stop = xpoint + width
     end
-    # TODO improve these error messages
-    @assert start > xin[1] - Float64(xin.step) "Not enough points at the beginning of the input"
-    @assert stop < xin[end] + Float64(xin.step) "Not enough points at the end of the input"
+    @assert start > xin[1] - Float64(xin.step) "not enough points at the beginning of the input for slice from $start to $stop"
+    @assert stop < xin[end] + Float64(xin.step) "not enough points at the end of the input for slice from $start to $stop"
 
     #find relevant input indices
     start_ind = find_first_above_or_equal(start, xin) 

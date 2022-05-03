@@ -194,9 +194,8 @@ end
 @testset "Strange required_points_per_slice Values" begin
     # disallow values smaller than 0, because slices without values in them do
     # not contribute anything, so the value of a point might become undefined
-    # without upsampling, which then is never triggered. If high performance
-    # like this is desired, required_points_per_slice=1 should be used with
-    # nearest neighbor upsampling, i.e. upsampling_basis=Rect(.5)
+    # without upsampling, which then is never triggered. If upsampling should
+    # never happen, use nearest neighbor interpolation from a different package. 
     @test_throws AssertionError regrid(xin, yin, [4.5, 7.7], required_points_per_slice=0)
     @test_throws AssertionError regrid(xin, yin, [4.5, 7.7], required_points_per_slice=-1)
     # disallow float values, because they result in discontinuous values with
@@ -205,5 +204,15 @@ end
     @test_throws TypeError regrid(xin, yin, [4.5, 7.7], required_points_per_slice=4.5)
 end
 
-# TODO test that basis=Rect(0.), upsampling_basis=Rect(.5) and required_points_per_slice=1
-# results in nearest neighbor behavior
+@testset "Invalid Basis Widths" begin
+    # Smoothing Kernel Width 0 => just use the upsampling kernel as smoothing kernel instead
+    @test_throws AssertionError regrid(xin, yin, [2.5, 4.9, 5.0, 6.4], 
+    RectangularBasis(0), 
+    upsampling_basis=RectangularBasis(.5), 
+    required_points_per_slice=1)
+
+    # Upsampling Kernel Width < 1 => not guaranteed to always have a point to each side
+    @test_throws AssertionError regrid(xin, yin, [2.5, 4.9, 5.0, 6.4], 
+    upsampling_basis=RectangularBasis(1 - eps(1.)), 
+    required_points_per_slice=1)
+end

@@ -8,10 +8,14 @@ export regrid
 function regrid(xin::StepRangeLen, yin, xout,
     smoothing_function::FiniteBasisFunction = RectangularBasis();
     required_points_per_slice::Integer=Int(round(4 * smoothing_function.width)), 
-    upsampling_basis=LanczosBasis()
+    upsampling_basis::FiniteBasisFunction=LanczosBasis()
     )
     # validate inputs
     @assert required_points_per_slice >= 1 "required_points_per_slice must at least be 1"
+    @assert smoothing_function.width > 0 "smoothing_function must have a width bigger than 0. "*
+        "Maybe use upsampling_basis as smoothing_function."
+    @assert upsampling_basis.width >= 1 "upsampling_basis width must at least be 1 to ensure "*
+        "there's at least one input point to each side of the upsampled point"
     # allocate
     yout = Array{Float64, 1}(undef, length(xout))
 

@@ -7,7 +7,8 @@ export regrid
 
 function regrid(xin::StepRangeLen, yin, xout,
     smoothing_function::FiniteBasisFunction = RectangularBasis();
-    required_points_per_slice=4, upsampling_basis=LanczosBasis()
+    required_points_per_slice=Int(round(4 * smoothing_function.width)), 
+    upsampling_basis=LanczosBasis()
     )
     # allocate
     yout = Array{Float64, 1}(undef, length(xout))
@@ -65,6 +66,7 @@ function Slice(unit_width, basis::FiniteBasisFunction, xpoint, xin, left::Bool, 
         start = xpoint
         stop = xpoint + width
     end
+    # TODO improve these error messages
     @assert start > xin[1] - Float64(xin.step) "Not enough points at the beginning of the input"
     @assert stop < xin[end] + Float64(xin.step) "Not enough points at the end of the input"
 

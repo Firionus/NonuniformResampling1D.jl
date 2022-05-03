@@ -147,34 +147,47 @@ end
         regrid(xin, yin, [4.5, 5., 6., 6.]))
 end
 
-@testset "Required Input Points per Unit" begin
-    # TODO clear this up
-
-    # The threshold, when upsampling is used before downsampling, shall be set
-    # by a variable called "required_points_per_unit". 
-    # From it, the "required_points_per_slice" shall be calculated as:
+@testset "Required Input Point per Slice" begin
+    # The default for required_points_per_slice should be
+    # required_points_per_unit = 4
     # required_points_per_slice = round(required_points_per_unit * smoothing_kernel.width)
 
-    # This way, Kernel functions of vastly different width (e.g. Rect .5 and
-    # Lanczos 4) can be easily exchanged without scaling the upsampling
-    # criterion. Otherwise, imagine having set required_points_per_slice to 2
-    # with Rect .5 (which is already an okay approximation) and changing to
-    # Lanczos 4, now 2 points_per_slice is wholly insufficient, since you'd
-    # probably want at least 8 points to cover the different regions of the
-    # smoothing function, but the algorithm would only ensure 2. 
+    # So, with the default kernel of Rect(.5), at least 2 points have to be in the slice. 
 
-    # Of course, the reverse argument applies when you scale the width of a
-    # given kernel - then you'd want the required_points_per_slice to be
-    # constant. But what would be a good default value for that?
+    # 1 2 3 4 5 6 7 8 9 10 11 12
+    #    *   | *   |
+    # (.9:4.1) (4.1:7.3)
+    # 2    2|1   2 -> no upsampling on first point, but on second point
+    result = regrid(xin, yin, [2.5, 5.7], upsampling_basis=TriangularBasis(1.))
+    @test result[1] == mean(yin[1:4])
+    itp = interpolate(yin, BSpline(Linear()))
+    expected_interpolation_positions = [
+        4.1+1.6/2*.5, 4.1+1.6/2*1.5, 5.7+.5*1.6/2, 5.7+1.5*1.6/2
+    ]
+    @test result[2] == mean(itp(expected_interpolation_positions))
 
-    # Well, I guess the default value for required_points_per_slice would be well set to be
-    # what was suggested above. But the parameter for manually setting it should be 
-    # required_points_per_slice. 
+    # When using a larger kernel, more points need to be in the slice
+    # e.g. Rect(.75) -> 3 points have to be in the slice
+    # 1 2 3 4 5 6 7 8 9 10 11 12
+    #      *     *    
+    # (1.1:5.9) (4.3:9.1)
+    # 2    2|2   3 -> upsampling on both points
+    result = regrid(xin, yin, [3.5, 6.7], RectangularBasis(.75),
+        upsampling_basis=TriangularBasis(1.))
+    itp = interpolate(yin, BSpline(Linear()))
+    s = 2.4/3 # step
+    expected_interpolation_positions1 = [
+        1.1+s*.5, 1.1+s*1.5, 1.1+s*2.5, 3.5+s*.5, 3.5+s*1.5, 3.5+s*2.5
+    ]
+    @test result[1] == mean(itp(expected_interpolation_positions1))
+    expected_interpolation_positions2 = [
+        4.3+s*.5, 4.3+s*1.5, 4.3+s*2.5, 6.7+s*.5, 6.7+s*1.5, 6.7+s*2.5
+    ]
+    @test result[2] ≈ mean(itp(expected_interpolation_positions2))
 
-    # Test default "required_points_per_unit" of 4
-    # use points spacings slightly above and below criterion
-    #regrid(xin, yin, [4.5, 8.4, 11.6])
-    #                    (4)   (3)
-
-    # TODO test what happens when 0 or -1 are used for required_points_per_slice
+    # with "disabled" interpolation
+    no_interpolation = regrid(xin, yin, [2.5, 5.7], required_points_per_slice = 1)
+    @test no_interpolation[1] == mean(yin[1:4])
+    @test no_interpolation[2] == mean(yin[5:7])
 end
+# TODO test what happens when 0 or -1 are used for required_points_per_slice

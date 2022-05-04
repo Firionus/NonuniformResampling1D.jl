@@ -5,14 +5,14 @@ include("range_utilities.jl")
 
 export regrid
 
-function regrid(xin::AbstractRange, yin, xout, smoothing_function=RectangularBasis(); kwargs...)
-    regrid(StepRangeLen(xin), yin, xout, smoothing_function, kwargs...)
+function regrid(xin::AbstractRange, yin, xout, smoothing_function=rect_window(); kwargs...)
+    regrid(StepRangeLen(xin), yin, xout, smoothing_function; kwargs...)
 end
 
 function regrid(xin::StepRangeLen, yin, xout,
-    smoothing_function::WindowFunction = RectangularBasis();
+    smoothing_function::WindowFunction = rect_window();
     required_points_per_slice::Integer=Int(round(4 * smoothing_function.width)), 
-    upsampling_basis::WindowFunction=LanczosBasis()
+    upsampling_basis::WindowFunction=lanczos_window()
     )
     # validate inputs
     @assert required_points_per_slice >= 1 "required_points_per_slice must at least be 1"

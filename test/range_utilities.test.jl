@@ -25,4 +25,16 @@
         @test find_last_below_or_equal(10.1, x) == 10
         @test find_last_below_or_equal(30, x) == 10
     end
+
+    @testset "find_last_below" begin
+        import NonuniformResampling1D.find_last_below
+        x = 1.0:1.0:10.0
+        @test_throws Exception find_last_below(1, x)
+        @test find_last_below(1.1, x) == 1
+        @test find_last_below(5.4, x) == 5
+        @test find_last_below(9.9, x) == 9
+        @test find_last_below(10, x) == 9
+        @test find_last_below(10.1, x) == 10
+        @test find_last_below(30, x) == 10
+    end
 end

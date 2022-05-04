@@ -45,21 +45,21 @@ tri_window(width=1.) = WindowFunction(
 )
 
 """
-    lanczos_window(lobes = 3)
+    lanczos_window(lobes = 3; width = 1)
 
-Lanczos window which is 1 at 0 and 0 at 1,2,3,4,...
+Lanczos window which is 1 at 0 and 0 at 1*`width`, 2*`width`, 3*`width`, ...
 
 The higher the number of lobes, the higher the accuracy of sinc approximation. 
 """
-function lanczos_window(lobes::Int = 3)
-    # TODO add width parameter for first null
+function lanczos_window(lobes::Int = 3; width=1.)
     @assert lobes > 0 "Lanczos window is only defined for at least one lobe"
 
     WindowFunction(
     x -> begin
-        x == 1 && return 1.
+        x == 0 && return 1.
+        x = x/width
         lobes*sin(pi*x)*sin(pi*x/lobes)/(pi^2*x^2)
     end,
-    lobes
+    lobes*width
     )
 end

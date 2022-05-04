@@ -20,6 +20,26 @@ include("fixtures.jl")
         @test b(1) == 0
     end
 
+    @testset "Lanczos Window" begin
+        w = lanczos_window() # lobes=3, width=1
+        @test w(0) == 1
+        @test w(.5) > .5
+        @test w(1) ≈ 0 atol=1e-15
+        @test w(1.5) < -.1
+        @test w(2) ≈ 0 atol=1e-15
+        @test w(2.5) > .01
+        @test w(3) ≈ 0 atol=1e-15
+
+        w = lanczos_window(3, width = 2) # lobes=3, width=2
+        @test w(0) == 1
+        @test w(1) > .5
+        @test w(2) ≈ 0 atol=1e-15
+        @test w(3) < -.1
+        @test w(4) ≈ 0 atol=1e-15
+        @test w(5) > .01
+        @test w(6) ≈ 0 atol=1e-15
+    end
+
     @testset "Invalid width" begin
         @test_throws AssertionError rect_window(0)
         @test_throws AssertionError rect_window(0.)

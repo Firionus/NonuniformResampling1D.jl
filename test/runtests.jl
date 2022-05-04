@@ -1,9 +1,9 @@
-using Regrid1D
+using NonuniformResampling1D
 using Test
 using Statistics
 using Interpolations
 
-@testset "Regrid1D Tests" begin
+@testset "NonuniformResampling1D Tests" begin
     include("range_utilities.test.jl")
     include("window_functions.test.jl")
     include("nuresample.test.jl")

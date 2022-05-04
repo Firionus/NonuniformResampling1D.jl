@@ -1,4 +1,4 @@
-module Regrid1D
+module NonuniformResampling1D
 
 include("WindowFunction.jl")
 include("window_functions.jl")

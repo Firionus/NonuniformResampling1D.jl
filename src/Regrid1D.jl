@@ -4,13 +4,13 @@ include("WindowFunction.jl")
 include("window_functions.jl")
 include("range_utilities.jl")
 
-export regrid
+export nuresample
 
-function regrid(xin::AbstractRange, yin, xout, smoothing_function=rect_window(); kwargs...)
-    regrid(StepRangeLen(xin), yin, xout, smoothing_function; kwargs...)
+function nuresample(xin::AbstractRange, yin, xout, smoothing_function=rect_window(); kwargs...)
+    nuresample(StepRangeLen(xin), yin, xout, smoothing_function; kwargs...)
 end
 
-function regrid(xin::StepRangeLen, yin, xout,
+function nuresample(xin::StepRangeLen, yin, xout,
     smoothing_function::WindowFunction = rect_window();
     required_points_per_slice::Integer=Int(round(4 * smoothing_function.width)), 
     upsampling_function::WindowFunction=lanczos_window()

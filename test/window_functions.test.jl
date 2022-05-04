@@ -26,7 +26,7 @@ include("fixtures.jl")
     end
 
     @testset "API Example for Predefined Window Functions" begin
-        regrid(xin, yin, [3.3, 4.1], rect_window(.7), 
+        nuresample(xin, yin, [3.3, 4.1], rect_window(.7), 
             required_points_per_slice=1, upsampling_function=rect_window(1.))
     end
 end

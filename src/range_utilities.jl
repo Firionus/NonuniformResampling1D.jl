@@ -24,6 +24,7 @@ function find_last_below_or_equal(cutoff, x::StepRangeLen)
     return min(x.len, ind)
 end
 
+# TODO test
 function find_last_below(cutoff, x::StepRangeLen)
     # this doesn't work for all cases - assert the right ones
     @assert Float64(x.step) > 0

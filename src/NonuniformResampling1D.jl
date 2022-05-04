@@ -6,6 +6,36 @@ include("range_utilities.jl")
 
 export nuresample
 
+"""
+    nuresample(xin, yin, xout, smoothing_function; kwargs...)
+
+Take data `yin` sampled at uniformly spaced locations `xin` and resample at
+arbitrary locations `xout`.
+
+# Positional Arguments
+
+- `xin` must be an `AbstractRange` to ensure uniform spacing
+- `yin` and `xout` typically are `Array`s
+- `smoothing_function` is a [`WindowFunction`](@ref). The width of the window
+  function is scaled proportional to the distance to the nearest neighbor on the
+  left and right side of the output point. At the start and end of `xout` a
+  symmetrical window is used. 
+    
+# Keyword Arguments
+
+- `upsampling_function`: a [`WindowFunction`](@ref) that is used to perform
+  upsampling when the density of input points is not high enough compared to the
+  density of output points. The default is Lanczos3. 
+- `required_points_per_slice`: the number of input points that must be in a
+  slice (left or right half of a window) before smoothing. If the number of
+  input points is lower than this value, upsampling is performed to create
+  `required_points_per_slice` many points before applying the smoothing
+  function.  
+  The default is `round(4 * smoothing_function.width)`, which means 4 points are
+  required per unit width to the nearest neighbor.  
+  The minimum value is 1, in which case upsampling is only performed if no input
+  point falls in a slice. 
+"""
 function nuresample(xin::AbstractRange, yin, xout, smoothing_function=rect_window(); kwargs...)
     nuresample(StepRangeLen(xin), yin, xout, smoothing_function; kwargs...)
 end

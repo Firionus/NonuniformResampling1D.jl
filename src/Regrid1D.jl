@@ -1,6 +1,7 @@
 module Regrid1D
 
-include("basis_functions.jl")
+include("WindowFunction.jl")
+include("window_functions.jl")
 include("range_utilities.jl")
 
 export regrid

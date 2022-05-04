@@ -35,6 +35,11 @@ evaluated up to the nearest neighbor.
 struct WindowFunction{F<:Function, T<:Real}
     _f::F
     width::T
+
+    function WindowFunction(_f::F, width::T) where {F<:Function, T<:Real}
+        @assert width > 0 "WindowFunction width must be bigger than 0"
+        new{F,T}(_f, width)
+    end
 end
 
 function(w::WindowFunction)(x)

@@ -17,4 +17,9 @@
         @test b(.5) == .5
         @test b(1) == 0
     end
+
+    @testset "Invalid width" begin
+        @test_throws AssertionError RectangularBasis(0)
+        @test_throws AssertionError RectangularBasis(0.)
+    end
 end

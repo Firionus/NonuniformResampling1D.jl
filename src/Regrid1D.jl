@@ -10,9 +10,9 @@ function regrid(xin::AbstractRange, yin, xout, smoothing_function=RectangularBas
 end
 
 function regrid(xin::StepRangeLen, yin, xout,
-    smoothing_function::FiniteBasisFunction = RectangularBasis();
+    smoothing_function::WindowFunction = RectangularBasis();
     required_points_per_slice::Integer=Int(round(4 * smoothing_function.width)), 
-    upsampling_basis::FiniteBasisFunction=LanczosBasis()
+    upsampling_basis::WindowFunction=LanczosBasis()
     )
     # validate inputs
     @assert required_points_per_slice >= 1 "required_points_per_slice must at least be 1"
@@ -65,7 +65,7 @@ struct Slice
         upsampling_required
 end
 
-function Slice(unit_width, basis::FiniteBasisFunction, xpoint, xin, left::Bool, required_points_per_slice)
+function Slice(unit_width, basis::WindowFunction, xpoint, xin, left::Bool, required_points_per_slice)
     # the unit width is the width to the neighboring point
     # now calculate slice width, which is the width in which points will be considered according to the finite basis
     width = unit_width*basis.width
@@ -96,7 +96,7 @@ function Slice(unit_width, basis::FiniteBasisFunction, xpoint, xin, left::Bool, 
     )
 end
 
-function interpolate_point(xin, yin, xpoint, left_unit_width, right_unit_width, basis::FiniteBasisFunction;
+function interpolate_point(xin, yin, xpoint, left_unit_width, right_unit_width, basis::WindowFunction;
     required_points_per_slice=1, upsampling_basis=missing,
     )
 
@@ -142,7 +142,7 @@ function slice_weighted_mean(xpoint, unit_width, xin_points, yin_points, basis)
         x = xin_points[i]
         y = yin_points[i]
         rel_pos = abs(x - xpoint)/unit_width
-        win_value::Float64 = basis_value(basis, rel_pos)
+        win_value::Float64 = basis(rel_pos)
         win_acc += win_value
         val_acc += y*win_value
     end

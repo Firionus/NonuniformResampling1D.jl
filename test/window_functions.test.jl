@@ -1,7 +1,7 @@
 include("fixtures.jl")
 
-@testset "Basis Functions" begin
-    @testset "Rectangular Basis" begin
+@testset "Window Functions" begin
+    @testset "Rectangular Window" begin
         b = rect_window() # width = .5
         @test_throws Exception b(prevfloat(0.))
         @test b(0) == 1.
@@ -11,7 +11,7 @@ include("fixtures.jl")
         @test b(100) == 0.
     end
 
-    @testset "Triangular Basis" begin
+    @testset "Triangular Window" begin
         b = tri_window() # width = 1.
         @test_throws Exception b(prevfloat(0.))
         @test b(0) == 1.
@@ -27,6 +27,6 @@ include("fixtures.jl")
 
     @testset "API Example for Predefined Window Functions" begin
         regrid(xin, yin, [3.3, 4.1], rect_window(.7), 
-            required_points_per_slice=1, upsampling_basis=rect_window(1.))
+            required_points_per_slice=1, upsampling_function=rect_window(1.))
     end
 end

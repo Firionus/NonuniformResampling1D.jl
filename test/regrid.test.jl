@@ -45,7 +45,7 @@ end
 
     # now with upsampling
     output_asymmetric_upsampling = regrid(xin, yin, xout, rect_window(1.), 
-        required_points_per_slice=2, upsampling_basis=tri_window(1.))
+        required_points_per_slice=2, upsampling_function=tri_window(1.))
     # expected: left slice only contains 1 point, but 2 are required
     # so both slices should be upsampled with a step of 0.9/2 = 0.45
     # upsampling positions therefore are: [3.125, 3.575] (left) and 
@@ -63,7 +63,7 @@ end
     
     # compare with large oversampling
     big_oversampling = regrid(xin, yin, xout, rect_window(1.), 
-    required_points_per_slice=9, upsampling_basis=tri_window(1.))[2]
+    required_points_per_slice=9, upsampling_function=tri_window(1.))[2]
     # relative difference between 2x and 9x oversampling should be smaller 0.96 %
     # (value that is just achieved with implementation at time of writing test)
     rel_change = abs(output_asymmetric_upsampling[2] - big_oversampling)/
@@ -75,10 +75,10 @@ end
     xout = [2.9, 3.8, 7.5] # middle point highly asymmetric
 
     result8 = regrid(xin, yin, xout, rect_window(1.), 
-    required_points_per_slice=8, upsampling_basis=tri_window(1.))[2]
+    required_points_per_slice=8, upsampling_function=tri_window(1.))[2]
 
     result32 = regrid(xin, yin, xout, rect_window(1.), 
-    required_points_per_slice=32, upsampling_basis=tri_window(1.))[2]
+    required_points_per_slice=32, upsampling_function=tri_window(1.))[2]
 
     # results should be very comparable
     @test abs(result8 - result32)/result32 < .001
@@ -155,7 +155,7 @@ end
     #    *   | *   |
     # (.9:4.1) (4.1:7.3)
     # 2    2|1   2 -> no upsampling on first point, but on second point
-    result = regrid(xin, yin, [2.5, 5.7], upsampling_basis=tri_window(1.))
+    result = regrid(xin, yin, [2.5, 5.7], upsampling_function=tri_window(1.))
     @test result[1] == mean(yin[1:4])
     itp = interpolate(yin, BSpline(Linear()))
     expected_interpolation_positions = [
@@ -170,7 +170,7 @@ end
     # (1.1:5.9) (4.3:9.1)
     # 2    2|2   3 -> upsampling on both points
     result = regrid(xin, yin, [3.5, 6.7], rect_window(.75),
-        upsampling_basis=tri_window(1.))
+        upsampling_function=tri_window(1.))
     itp = interpolate(yin, BSpline(Linear()))
     s = 2.4/3 # step
     expected_interpolation_positions1 = [
@@ -201,16 +201,16 @@ end
     @test_throws TypeError regrid(xin, yin, [4.5, 7.7], required_points_per_slice=4.5)
 end
 
-@testset "Invalid Basis Widths" begin
+@testset "Invalid Window Widths" begin
     # Smoothing Kernel Width 0 => just use the upsampling kernel as smoothing kernel instead
     @test_throws AssertionError regrid(xin, yin, [2.5, 4.9, 5.0, 6.4], 
     rect_window(0), 
-    upsampling_basis=rect_window(.5), 
+    upsampling_function=rect_window(.5), 
     required_points_per_slice=1)
 
     # Upsampling Kernel Width < 1 => not guaranteed to always have a point to each side
     @test_throws AssertionError regrid(xin, yin, [2.5, 4.9, 5.0, 6.4], 
-    upsampling_basis=rect_window(1 - eps(1.)), 
+    upsampling_function=rect_window(1 - eps(1.)), 
     required_points_per_slice=1)
 end
 

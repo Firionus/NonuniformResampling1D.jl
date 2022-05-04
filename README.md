@@ -17,9 +17,9 @@ If you are interested in collaborating, please open an issue.
 ## Approach
 
 - Use distance to next grid point as a kind of "local sample rate" with which to
-  scale basis functions for interpolation/smoothing. Treat left and right
+  scale window functions for interpolation/smoothing. Treat left and right
   neighbor separately and average between them. 
-- First perform upsampling by adding basis functions from each input point.
+- First perform upsampling by adding window functions from each input point.
   Require a certain amount of upsampling in any case. 
 - If output points are closer than input points, do even more upsampling
 - Then create output point values by weighted average where the smoothing

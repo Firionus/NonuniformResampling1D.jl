@@ -20,7 +20,7 @@ tri_window(width=1.) = WindowFunction(
 )
 
 function lanczos_window(lobes::Int = 3)
-    @assert lobes > 0 "Lanczos Basis is only defined for at least one lobe"
+    @assert lobes > 0 "Lanczos window is only defined for at least one lobe"
 
     WindowFunction(
     x -> begin

@@ -10,16 +10,18 @@ export nuresample
     nuresample(xin, yin, xout, smoothing_function; kwargs...)
 
 Take data `yin` sampled at uniformly spaced locations `xin` and resample at
-arbitrary locations `xout`.
+nonuniform locations `xout`. 
 
 # Positional Arguments
 
-- `xin` must be an `AbstractRange` to ensure uniform spacing
-- `yin` and `xout` typically are `Array`s
+- `xin` is an `AbstractRange` of input locations
+- `yin` are the input values
+- `xout` are the increasing output locations
 - `smoothing_function` is a [`WindowFunction`](@ref). The width of the window
   function is scaled proportional to the distance to the nearest neighbor on the
   left and right side of the output point. At the start and end of `xout` a
-  symmetrical window is used. 
+  symmetrical window is used. The default is a rectangular window without
+  overlap. 
     
 # Keyword Arguments
 
@@ -35,6 +37,19 @@ arbitrary locations `xout`.
   required per unit width to the nearest neighbor.  
   The minimum value is 1, in which case upsampling is only performed if no input
   point falls in a slice. 
+
+# Examples
+
+```jldoctest
+julia> nuresample(1:9, 1:9, [4.2, 6.2])
+2-element Vector{Float64}:
+ 4.201106036510037
+ 6.201106036510037
+``` 
+
+# Output Type
+
+Returns an `Array{Float64, 1}`. Other output types are currently unsupported. 
 """
 function nuresample(xin::AbstractRange, yin, xout, smoothing_function=rect_window(); kwargs...)
     nuresample(StepRangeLen(xin), yin, xout, smoothing_function; kwargs...)

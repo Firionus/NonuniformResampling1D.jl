@@ -7,7 +7,7 @@ export hann_window, rect_window, kaiser_window, tri_window, lanczos_window
 
 Rectangular window which is 1 from 0 to `width` and 0 otherwise. 
 
-Used to calculate a moving average.
+Can be used to calculate a moving average, for example.
 """
 rect_window(width = 0.5) = WindowFunction(x -> 1.0, width)
 

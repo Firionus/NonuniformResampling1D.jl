@@ -47,6 +47,16 @@ julia> nuresample(1:9, 1:9, [4.2, 6.2])
  6.201106036510037
 ``` 
 
+```jldoctest
+julia> nuresample(1:9, 1:9, [4.2, 6.2], 
+        rect_window(.5), # moving average without overlap
+        required_points_per_slice = 1, # no upsampling
+        upsampling_function = lanczos_window(2)) # Lanczos2 interpolation if a slice were empty
+2-element Vector{Float64}:
+ 4.5
+ 6.5
+``` 
+
 # Output Type
 
 Returns an `Array{Float64, 1}`. Other output types are currently unsupported. 

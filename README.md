@@ -97,7 +97,7 @@ julia> nuresample(1:9, 1:9, [4.2, 6.2],
 Returns an `Array{Float64, 1}`. Other output types are currently unsupported. 
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/NonuniformResampling1D.jl#L9-L63' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/e8a4370c80e5ff3fe3e809fe037d78a6f87dea66/src/NonuniformResampling1D.jl#L9-L63' class='documenter-source'>source</a><br>
 
 
 <a id='Window-Functions'></a>
@@ -120,7 +120,7 @@ Rectangular window which is 1 from 0 to `width` and 0 otherwise.
 Can be used to calculate a moving average, for example.
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/window_functions.jl#L5-L11' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/e8a4370c80e5ff3fe3e809fe037d78a6f87dea66/src/window_functions.jl#L5-L11' class='documenter-source'>source</a><br>
 
 <a id='NonuniformResampling1D.hann_window' href='#NonuniformResampling1D.hann_window'>#</a>
 **`NonuniformResampling1D.hann_window`** &mdash; *Function*.
@@ -134,7 +134,7 @@ hann_window(width = 1)
 Hann window (raised cosine) that is 1 at 0 and reaches 0 at `width`.
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/window_functions.jl#L14-L18' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/e8a4370c80e5ff3fe3e809fe037d78a6f87dea66/src/window_functions.jl#L14-L18' class='documenter-source'>source</a><br>
 
 <a id='NonuniformResampling1D.tri_window' href='#NonuniformResampling1D.tri_window'>#</a>
 **`NonuniformResampling1D.tri_window`** &mdash; *Function*.
@@ -150,7 +150,7 @@ Triangular window which is 1 at 0 and reaches 0 at `width`.
 Can be used to perform linear interpolation when used as upsampling_function with `width=1`. 
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/window_functions.jl#L34-L41' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/e8a4370c80e5ff3fe3e809fe037d78a6f87dea66/src/window_functions.jl#L34-L41' class='documenter-source'>source</a><br>
 
 <a id='NonuniformResampling1D.kaiser_window' href='#NonuniformResampling1D.kaiser_window'>#</a>
 **`NonuniformResampling1D.kaiser_window`** &mdash; *Function*.
@@ -164,7 +164,7 @@ kaiser_window(width = 1.2; alpha = 3.5)
 Kaiser window cut off at `width` with the shape parameter `alpha`.
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/window_functions.jl#L24-L28' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/e8a4370c80e5ff3fe3e809fe037d78a6f87dea66/src/window_functions.jl#L24-L28' class='documenter-source'>source</a><br>
 
 <a id='NonuniformResampling1D.lanczos_window' href='#NonuniformResampling1D.lanczos_window'>#</a>
 **`NonuniformResampling1D.lanczos_window`** &mdash; *Function*.
@@ -180,7 +180,14 @@ Lanczos window which is 1 at 0 and 0 at 1*`width`, 2*`width`, 3*`width`, ...
 The higher the number of lobes, the higher the accuracy of sinc approximation. 
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/window_functions.jl#L47-L53' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/e8a4370c80e5ff3fe3e809fe037d78a6f87dea66/src/window_functions.jl#L47-L53' class='documenter-source'>source</a><br>
+
+
+<a id='Custom-Window-Functions'></a>
+
+<a id='Custom-Window-Functions-1'></a>
+
+### Custom Window Functions
 
 
 To define your own window functions, take a look at the examples in [window_functions.jl](https://github.com/Firionus/NonuniformResampling1D.jl/blob/main/src/window_functions.jl) and use the exported `WindowFunction` type:
@@ -228,7 +235,7 @@ julia> rectangular_window(.6)
 ```
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/WindowFunction.jl#L3-L44' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/e8a4370c80e5ff3fe3e809fe037d78a6f87dea66/src/WindowFunction.jl#L3-L44' class='documenter-source'>source</a><br>
 
 
 <a id='Resampling-Approach'></a>
@@ -238,13 +245,33 @@ julia> rectangular_window(.6)
 ## Resampling Approach
 
 
-The basic idea of the provided algorithm is that the output value at any point should be given by a weighted average of input points in a region around the output point. This region is called a slice and is proportional in size to the distance to the next neighbor. 
+The basic idea of the provided algorithm is that the output value at any location should be given by a weighted average of input values in a region around the output point, where the weight is given by a window function. The supporting region is called a slice and is proportional in size to the distance to the next neighbor. The ratio between slice width and distance to the nearest neighbor is the window function width and determines how strong the smoothing is. 
 
 
-TODO
+Further, if there are few points in a slice, the result might not be accurate. Therefore, ad-hoc resampling is used. So if the left or right slice of an output point contains less points than specified, upsampling on a regular grid is performed for both slices. 
 
 
-TODO Insert Diagramm
+Consider an example with 
+
+
+```julia
+nuresample(xin, yin, xout, hann_window(1.35), required_points_per_slice = 4)
+```
+
+
+which can be visualized like this:
+
+
+![Diagram Showing the Resampling Approach](examples/explanation_diagram.svg)
+
+
+The orange output point shows how the window function and supporting regions are scaled asymmetrically around the output point, depending on how far the neighboring output points are away. The input values and the window function are multiplied pointwise, resulting in the windowed slices shown in the second plot from the top. The normalized average of these points is the orange output value. 
+
+
+The blue point shows the dynamic upsampling. since its slices contain less than 4 points, upsampling is applied before applying the window function. The default upsampling function Lanczos3 is used to create the points in bright blue. They are created with uniform step size. The upsampled points are then weighted with the window function and the normalized average forms the blue output value. 
+
+
+Upsampling is performed for both slices, even if only one of them has too few points. This ensures that the weight between the two slices stays approximately even. The upsampling step is the same between the two slices and is chosen such that `required_points_per_slice` are created in the smaller of the two slices.
 
 
 <a id='Status'></a>

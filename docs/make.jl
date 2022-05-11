@@ -1,5 +1,14 @@
 using Pkg
 
+# build example plot
+cd("../examples")
+Pkg.activate(".")
+Pkg.instantiate()
+
+include("../examples/explanation_diagram.jl")
+
+# build docs
+cd("../docs")
 Pkg.activate(".")
 Pkg.instantiate()
 

@@ -1,3 +1,5 @@
+export WindowFunction
+
 """
     WindowFunction{F<:Function, T<:Real}
 

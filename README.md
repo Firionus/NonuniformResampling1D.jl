@@ -97,7 +97,7 @@ julia> nuresample(1:9, 1:9, [4.2, 6.2],
 Returns an `Array{Float64, 1}`. Other output types are currently unsupported. 
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/d4e3bba7a31cb869bec0bc190486830878c0d9d0/src/NonuniformResampling1D.jl#L9-L63' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/NonuniformResampling1D.jl#L9-L63' class='documenter-source'>source</a><br>
 
 
 <a id='Window-Functions'></a>
@@ -120,7 +120,7 @@ Rectangular window which is 1 from 0 to `width` and 0 otherwise.
 Can be used to calculate a moving average, for example.
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/d4e3bba7a31cb869bec0bc190486830878c0d9d0/src/window_functions.jl#L5-L11' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/window_functions.jl#L5-L11' class='documenter-source'>source</a><br>
 
 <a id='NonuniformResampling1D.hann_window' href='#NonuniformResampling1D.hann_window'>#</a>
 **`NonuniformResampling1D.hann_window`** &mdash; *Function*.
@@ -134,7 +134,7 @@ hann_window(width = 1)
 Hann window (raised cosine) that is 1 at 0 and reaches 0 at `width`.
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/d4e3bba7a31cb869bec0bc190486830878c0d9d0/src/window_functions.jl#L14-L18' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/window_functions.jl#L14-L18' class='documenter-source'>source</a><br>
 
 <a id='NonuniformResampling1D.tri_window' href='#NonuniformResampling1D.tri_window'>#</a>
 **`NonuniformResampling1D.tri_window`** &mdash; *Function*.
@@ -150,7 +150,7 @@ Triangular window which is 1 at 0 and reaches 0 at `width`.
 Can be used to perform linear interpolation when used as upsampling_function with `width=1`. 
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/d4e3bba7a31cb869bec0bc190486830878c0d9d0/src/window_functions.jl#L34-L41' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/window_functions.jl#L34-L41' class='documenter-source'>source</a><br>
 
 <a id='NonuniformResampling1D.kaiser_window' href='#NonuniformResampling1D.kaiser_window'>#</a>
 **`NonuniformResampling1D.kaiser_window`** &mdash; *Function*.
@@ -164,7 +164,7 @@ kaiser_window(width = 1.2; alpha = 3.5)
 Kaiser window cut off at `width` with the shape parameter `alpha`.
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/d4e3bba7a31cb869bec0bc190486830878c0d9d0/src/window_functions.jl#L24-L28' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/window_functions.jl#L24-L28' class='documenter-source'>source</a><br>
 
 <a id='NonuniformResampling1D.lanczos_window' href='#NonuniformResampling1D.lanczos_window'>#</a>
 **`NonuniformResampling1D.lanczos_window`** &mdash; *Function*.
@@ -180,17 +180,10 @@ Lanczos window which is 1 at 0 and 0 at 1*`width`, 2*`width`, 3*`width`, ...
 The higher the number of lobes, the higher the accuracy of sinc approximation. 
 
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/d4e3bba7a31cb869bec0bc190486830878c0d9d0/src/window_functions.jl#L47-L53' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/window_functions.jl#L47-L53' class='documenter-source'>source</a><br>
 
 
-<a id='Window-Function-Type'></a>
-
-<a id='Window-Function-Type-1'></a>
-
-# Window Function Type
-
-
-To define your own window functions, you can construct your own 
+To define your own window functions, take a look at the examples in [window_functions.jl](https://github.com/Firionus/NonuniformResampling1D.jl/blob/main/src/window_functions.jl) and use the exported `WindowFunction` type:
 
 <a id='NonuniformResampling1D.WindowFunction' href='#NonuniformResampling1D.WindowFunction'>#</a>
 **`NonuniformResampling1D.WindowFunction`** &mdash; *Type*.
@@ -198,7 +191,7 @@ To define your own window functions, you can construct your own
 
 
 ```julia
-WindowFunction{F<:Function, T<:Real}
+WindowFunction(_f::Function, width)
 ```
 
 A radial window function. 
@@ -221,8 +214,21 @@ Value up to which the callback function will be evaluated.
 
 `width` must be bigger than 0. A `width` of 1 means that the window function is evaluated up to the nearest neighbor. 
 
+**Examples**
 
-<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/d4e3bba7a31cb869bec0bc190486830878c0d9d0/src/WindowFunction.jl#L3-L31' class='documenter-source'>source</a><br>
+```julia-repl
+julia> rectangular_window = WindowFunction(x -> 1., 0.5)
+WindowFunction{var"#1#2", Float64}(var"#1#2"(), 0.5)
+
+julia> rectangular_window(.4)
+1.0
+
+julia> rectangular_window(.6)
+0.0
+```
+
+
+<a target='_blank' href='https://github.com/Firionus/NonuniformResampling1D.jl/blob/baa06f6070c23831dcfed283f2d8a8e3ab202f14/src/WindowFunction.jl#L3-L44' class='documenter-source'>source</a><br>
 
 
 <a id='Resampling-Approach'></a>

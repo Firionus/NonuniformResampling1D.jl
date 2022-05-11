@@ -41,9 +41,9 @@ kaiser_window
 lanczos_window
 ```
 
-# Window Function Type
+### Custom Window Functions
 
-To define your own window functions, you can construct your own 
+To define your own window functions, take a look at the examples in [window_functions.jl](https://github.com/Firionus/NonuniformResampling1D.jl/blob/main/src/window_functions.jl) and use the exported `WindowFunction` type:
 
 ```@docs
 WindowFunction

@@ -1,7 +1,7 @@
 export WindowFunction
 
 """
-    WindowFunction{F<:Function, T<:Real}
+    WindowFunction(_f::Function, width)
 
 A radial window function. 
 
@@ -28,6 +28,19 @@ Value up to which the callback function will be evaluated.
     
 `width` must be bigger than 0. A `width` of 1 means that the window function is
 evaluated up to the nearest neighbor. 
+
+# Examples
+
+```jldoctest
+julia> rectangular_window = WindowFunction(x -> 1., 0.5)
+WindowFunction{var"#1#2", Float64}(var"#1#2"(), 0.5)
+
+julia> rectangular_window(.4)
+1.0
+
+julia> rectangular_window(.6)
+0.0
+```
 """
 struct WindowFunction{F<:Function, T<:Real}
     _f::F

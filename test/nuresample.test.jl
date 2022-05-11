@@ -219,3 +219,7 @@ end
     @test_throws MethodError nuresample(xin, yin) # check this dispatch isn't recursive
     @test_throws MethodError nuresample(xin, yin, [2.2, 3.1]; abc=12) # check this dispatch isn't recursive
 end
+
+@testset "StackOverflowError with wrong argument types" begin
+    @test_broken nuresample(xin, yin, [3.2, 5.2], 1.3)
+end

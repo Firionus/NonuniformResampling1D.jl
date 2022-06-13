@@ -33,6 +33,8 @@ nuresample
 
 ## Window Functions
 
+![Diagram Showing the Different Available Windows](examples/windows.svg)
+
 ```@docs
 rect_window
 hann_window
@@ -91,7 +93,7 @@ that `required_points_per_slice` are created in the smaller of the two slices.
 
 ## Status
 
-This package is in its youth and some hickups, like occasional errors or
+This package is in its youth and some hiccups, like occasional errors or
 suboptimal performance, are expected. Please see the
 [Issues](https://github.com/Firionus/NonuniformResampling1D.jl/issues) for
 details and report any problems you experience. 

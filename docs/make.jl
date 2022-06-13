@@ -6,6 +6,7 @@ Pkg.activate(".")
 Pkg.instantiate()
 
 include("../examples/explanation_diagram.jl")
+include("../examples/plot_windows.jl")
 
 # build docs
 cd("../docs")

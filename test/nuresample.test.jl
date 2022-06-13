@@ -233,6 +233,9 @@ end
 @testset "Error with OffsetArrays" begin
     using OffsetArrays
     yino = OffsetArray(yin, -1)
-    xout = OffsetArray([4.9, 5.8, 6.8], -2)
+    xout = [4.9, 5.8, 6.8]
+    xouto = OffsetArray(xout, -2)
     @test_throws ArgumentError nuresample(xin, yino, xout)
+    @test_throws ArgumentError nuresample(xin, yin, xouto)
+    @test_throws ArgumentError nuresample(xin, yino, xouto)
 end

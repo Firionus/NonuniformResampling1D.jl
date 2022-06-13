@@ -223,3 +223,16 @@ end
 @testset "StackOverflowError with wrong argument types" begin
     @test_broken nuresample(xin, yin, [3.2, 5.2], 1.3)
 end
+
+@testset "Support Array Views as Inputs" begin
+    xout = [0, 4.9, 5.8, 6.8]
+    @test nuresample(xin[2:end], @view(yin[2:end]), @view(xout[2:end])) ==
+        nuresample(xin[2:end], yin[2:end], xout[2:end])
+end
+
+@testset "Error with OffsetArrays" begin
+    using OffsetArrays
+    yino = OffsetArray(yin, -1)
+    xout = OffsetArray([4.9, 5.8, 6.8], -2)
+    @test_throws ArgumentError nuresample(xin, yino, xout)
+end

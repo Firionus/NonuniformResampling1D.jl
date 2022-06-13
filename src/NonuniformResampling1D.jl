@@ -15,8 +15,8 @@ nonuniform locations `xout`.
 # Positional Arguments
 
 - `xin` is an `AbstractRange` of input locations
-- `yin` are the input values
-- `xout` are the increasing output locations
+- `yin` is an `AbstractArray` with the input values
+- `xout` is an `AbstractArray` with  the the increasing output locations
 - `smoothing_function` is a [`WindowFunction`](@ref). The width of the window
   function is scaled proportional to the distance to the nearest neighbor on the
   left and right side of the output point. At the start and end of `xout` a
@@ -65,12 +65,13 @@ function nuresample(xin::AbstractRange, yin, xout, smoothing_function=rect_windo
     nuresample(StepRangeLen(xin), yin, xout, smoothing_function; kwargs...)
 end
 
-function nuresample(xin::StepRangeLen, yin, xout,
+function nuresample(xin::StepRangeLen, yin::AbstractArray, xout::AbstractArray,
     smoothing_function::WindowFunction = rect_window();
     required_points_per_slice::Integer=Int(round(4 * smoothing_function.width)), 
     upsampling_function::WindowFunction=lanczos_window()
     )
     # validate inputs
+    Base.require_one_based_indexing(yin, xout)
     @assert required_points_per_slice >= 1 "required_points_per_slice must at least be 1"
     @assert smoothing_function.width > 0 "smoothing_function must have a width bigger than 0. "*
         "Maybe use upsampling_function as smoothing_function."

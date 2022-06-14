@@ -21,6 +21,17 @@ end
         ]
 end
 
+@testset "Basic Example 2 - reversed inputs" begin
+    xin = reverse(1.0:1.0:9.0)
+    yin = reverse([0, 8, 2, 7, 4, 9, 7, 8, 4])
+    xout = [3.2, 6]
+    @test nuresample(xin, yin, xout, 
+    required_points_per_slice=1) == [
+        mean(reverse(yin)[2:4]), 
+        mean(reverse(yin)[5:7])
+        ]
+end
+
 @testset "Example that Should not Cause NaN Result" begin
     yin = [1.0, 212.47605778632067, 118.55093948572791, 273.88610509333614, 
     307.67343485176576, 257.1875847477985, 357.4538672443729, 484.87523154603514, 
@@ -223,7 +234,8 @@ end
 @testset "MethodError with wrong argument types" begin
     @test_throws MethodError nuresample(xin, yin, [3.2, 5.2], 1.3)
     @test_throws MethodError nuresample(xin, 2.2, [3.2, 5.2], 1.3)
-    @test_throws MethodError nuresample(xin, yin, 3.2, 1.3)
+    @test_throws MethodError nuresample(xin, yin, 3.2)
+    @test_throws MethodError nuresample(xin, yin, [3.2, 5.2]; random_kwarg=12)
 end
 
 @testset "Support Array Views as Inputs" begin

@@ -61,19 +61,17 @@ julia> nuresample(1:9, 1:9, [4.2, 6.2],
 
 Returns an `Array{Float64, 1}`. Other output types are currently unsupported. 
 """
-function nuresample(xin::AbstractRange, yin, xout, 
-    smoothing_function::WindowFunction=rect_window(); kwargs...
-    )
-    nuresample(StepRangeLen(xin), yin, xout, smoothing_function; kwargs...)
-end
-
-function nuresample(xin::StepRangeLen, yin::AbstractArray, xout::AbstractArray,
+function nuresample(xin::AbstractRange, yin::AbstractArray, xout::AbstractArray,
     smoothing_function::WindowFunction = rect_window();
     required_points_per_slice::Integer=Int(round(4 * smoothing_function.width)), 
     upsampling_function::WindowFunction=lanczos_window()
     )
     # validate inputs
     Base.require_one_based_indexing(yin, xout)
+    if step(xin) < 0
+        xin, yin = (xin, yin).|>reverse
+    end
+    @assert step(xin) > 0 "xin must be increasing"
     @assert required_points_per_slice >= 1 "required_points_per_slice must at least be 1"
     @assert smoothing_function.width > 0 "smoothing_function must have a width bigger than 0. "*
         "Maybe use upsampling_function as smoothing_function."
@@ -136,8 +134,9 @@ function Slice(unit_width, window::WindowFunction, xpoint, xin, left::Bool, requ
         start = xpoint
         stop = xpoint + width
     end
-    @assert start > xin[1] - Float64(xin.step) "not enough points at the beginning of the input for slice from $start to $stop"
-    @assert stop < xin[end] + Float64(xin.step) "not enough points at the end of the input for slice from $start to $stop"
+    # TODO are these safe with reversed indices?
+    @assert start > first(xin) - step(xin) "not enough points at the beginning of the input for slice from $start to $stop"
+    @assert stop < last(xin) + step(xin) "not enough points at the end of the input for slice from $start to $stop"
 
     #find relevant input indices
     start_ind = find_first_above_or_equal(start, xin) 
@@ -182,6 +181,7 @@ function interpolate_point(xin, yin, xpoint, left_unit_width, right_unit_width, 
 end
 
 function prepare_input(sc::Slice, xin, yin)
+    # TODO is this safe with non-convetional indexing?
     input_x = xin[sc.start_ind:sc.stop_ind]
     input_y = @view yin[sc.start_ind:sc.stop_ind]
     return (input_x, input_y)
@@ -189,7 +189,7 @@ end
 
 function upsample_prepare_input(slice::Slice, xin, yin, upsample_step, upsampling_function)
     input_x = range(slice.start + upsample_step/2, step=upsample_step, stop=slice.stop)
-    in_step = Float64(xin.step)
+    in_step = step(xin)
     input_y = [interpolate_point(xin, yin, up_x, in_step, in_step, upsampling_function) for up_x in input_x] 
     return (input_x, input_y)
 end

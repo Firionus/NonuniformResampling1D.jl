@@ -41,8 +41,8 @@ include("fixtures.jl")
     end
 
     @testset "Invalid width" begin
-        @test_throws AssertionError rect_window(0)
-        @test_throws AssertionError rect_window(0.)
+        @test_throws ArgumentError rect_window(0)
+        @test_throws ArgumentError rect_window(0.)
     end
 
     @testset "API Example for Predefined Window Functions" begin

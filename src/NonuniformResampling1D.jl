@@ -1,5 +1,7 @@
 module NonuniformResampling1D
 
+using ArgCheck
+
 include("WindowFunction.jl")
 include("window_functions.jl")
 include("range_utilities.jl")
@@ -71,11 +73,11 @@ function nuresample(xin::AbstractRange, yin::AbstractArray, xout::AbstractArray,
     if step(xin) < 0
         xin, yin = (xin, yin).|>reverse
     end
-    @assert step(xin) > 0 "xin must be increasing"
-    @assert required_points_per_slice >= 1 "required_points_per_slice must at least be 1"
-    @assert smoothing_function.width > 0 "smoothing_function must have a width bigger than 0. "*
+    @assert step(xin) > 0 "xin should be increasing at this point"
+    @argcheck required_points_per_slice >= 1 "required_points_per_slice must at least be 1"
+    @argcheck smoothing_function.width > 0 "smoothing_function must have a width bigger than 0. "*
         "Maybe use upsampling_function as smoothing_function."
-    @assert upsampling_function.width >= 1 "upsampling_function width must at least be 1 to ensure "*
+    @argcheck upsampling_function.width >= 1 "upsampling_function width must at least be 1 to ensure "*
         "there's at least one input point to each side of the upsampled point"
     # allocate
     yout = Array{Float64, 1}(undef, length(xout))
@@ -134,9 +136,10 @@ function Slice(unit_width, window::WindowFunction, xpoint, xin, left::Bool, requ
         start = xpoint
         stop = xpoint + width
     end
-    # TODO are these safe with reversed indices?
-    @assert start > first(xin) - step(xin) "not enough points at the beginning of the input for slice from $start to $stop"
-    @assert stop < last(xin) + step(xin) "not enough points at the end of the input for slice from $start to $stop"
+    start > first(xin) - step(xin) || "not enough points at the beginning of " +
+    "the input for slice from $start to $stop"|>error
+    stop < last(xin) + step(xin) || "not enough points at the end of the input " +
+    "for slice from $start to $stop"|>error
 
     #find relevant input indices
     start_ind = find_first_above_or_equal(start, xin) 

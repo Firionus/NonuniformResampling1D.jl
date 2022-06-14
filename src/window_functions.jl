@@ -52,7 +52,7 @@ Lanczos window which is 1 at 0 and 0 at 1*`width`, 2*`width`, 3*`width`, ...
 The higher the number of lobes, the higher the accuracy of sinc approximation. 
 """
 function lanczos_window(lobes::Int = 3; width=1.)
-    @assert lobes > 0 "Lanczos window is only defined for at least one lobe"
+    @argcheck lobes > 0 "Lanczos window is only defined for at least one lobe"
 
     WindowFunction(
     x -> begin

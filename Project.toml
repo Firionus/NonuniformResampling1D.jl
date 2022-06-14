@@ -4,6 +4,7 @@ authors = ["Johannes Fried <jcmf.schule@gmail.com> and contributors"]
 version = "0.2.0"
 
 [deps]
+ArgCheck = "dce04be8-c92d-5529-be00-80e4d2c0e197"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]

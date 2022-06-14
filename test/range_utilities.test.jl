@@ -10,13 +10,13 @@
         @test find_first_above_or_equal(5.4, x) == 6
         @test find_first_above_or_equal(9.9, x) == 10
         @test find_first_above_or_equal(10, x) == 10
-        @test_throws Exception find_first_above_or_equal(10.1, x)
+        @test_throws ErrorException find_first_above_or_equal(10.1, x)
     end
     
     @testset "find_last_below_or_equal" begin
         import NonuniformResampling1D.find_last_below_or_equal
         x = 1.0:1.0:10.0
-        @test_throws Exception find_last_below_or_equal(.9, x)
+        @test_throws ErrorException find_last_below_or_equal(.9, x)
         @test find_last_below_or_equal(1, x) == 1
         @test find_last_below_or_equal(1.1, x) == 1
         @test find_last_below_or_equal(5.4, x) == 5
@@ -29,7 +29,7 @@
     @testset "find_last_below" begin
         import NonuniformResampling1D.find_last_below
         x = 1.0:1.0:10.0
-        @test_throws Exception find_last_below(1, x)
+        @test_throws ErrorException find_last_below(1, x)
         @test find_last_below(1.1, x) == 1
         @test find_last_below(5.4, x) == 5
         @test find_last_below(9.9, x) == 9

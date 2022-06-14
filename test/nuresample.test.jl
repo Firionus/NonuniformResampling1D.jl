@@ -204,8 +204,8 @@ end
     # not contribute anything, so the value of a point might become undefined
     # without upsampling, which then is never triggered. If upsampling should
     # never happen, use nearest neighbor interpolation from a different package. 
-    @test_throws AssertionError nuresample(xin, yin, [4.5, 7.7], required_points_per_slice=0)
-    @test_throws AssertionError nuresample(xin, yin, [4.5, 7.7], required_points_per_slice=-1)
+    @test_throws ArgumentError nuresample(xin, yin, [4.5, 7.7], required_points_per_slice=0)
+    @test_throws ArgumentError nuresample(xin, yin, [4.5, 7.7], required_points_per_slice=-1)
     # disallow float values, because they result in discontinuous values with
     # the upsampling algorithm, i.e. the outputs values with 4.5 are very
     # different from 4 or 5
@@ -214,13 +214,13 @@ end
 
 @testset "Invalid Window Widths" begin
     # Smoothing Kernel Width 0 => just use the upsampling kernel as smoothing kernel instead
-    @test_throws AssertionError nuresample(xin, yin, [2.5, 4.9, 5.0, 6.4], 
+    @test_throws ArgumentError nuresample(xin, yin, [2.5, 4.9, 5.0, 6.4], 
     rect_window(0), 
     upsampling_function=rect_window(.5), 
     required_points_per_slice=1)
 
     # Upsampling Kernel Width < 1 => not guaranteed to always have a point to each side
-    @test_throws AssertionError nuresample(xin, yin, [2.5, 4.9, 5.0, 6.4], 
+    @test_throws ArgumentError nuresample(xin, yin, [2.5, 4.9, 5.0, 6.4], 
     upsampling_function=rect_window(1 - eps(1.)), 
     required_points_per_slice=1)
 end

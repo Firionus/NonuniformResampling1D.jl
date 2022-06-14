@@ -27,7 +27,8 @@ Assumes `step(r) > 0`.
 """
 function find_first_above_or_equal(cutoff::Real, r::AbstractRange)
     i = (find_float_offset(r, cutoff)|>ceil|>Int) + firstindex(r)
-    @assert i <= lastindex(r) # none of the elements are above or equal the cutoff
+    i <= lastindex(r) || "none of the range elements are above or equal the cutoff"|>
+        error
     max(firstindex(r), i)
 end
 
@@ -41,7 +42,8 @@ Assumes `step(r) > 0`.
 """
 function find_last_below_or_equal(cutoff::Real, r::AbstractRange)
     i = (find_float_offset(r, cutoff)|>floor|>Int) + firstindex(r)
-    @assert i >= firstindex(r) # none of the elements are below or equal the cutoff
+    i >= firstindex(r) || "none of the range elements are below or equal the cutoff"|>
+        error
     return min(lastindex(r), i)
 end
 
@@ -54,6 +56,7 @@ Assumes `step(r) > 0`.
 """
 function find_last_below(cutoff::Real, r::AbstractRange)
     i = (find_float_offset(r, cutoff)|>prevfloat|>floor|>Int) + firstindex(r)
-    @assert i >= firstindex(r) # none of the elements are below or equal the cutoff
-    return min(lastindex(r), i)
+    i >= firstindex(r) || "none of the range elements are below or equal to the cutoff"|>
+        error
+    min(lastindex(r), i)
 end

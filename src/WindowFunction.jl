@@ -47,13 +47,13 @@ struct WindowFunction{F<:Function, T<:Real}
     width::T
 
     function WindowFunction(_f::F, width::T) where {F<:Function, T<:Real}
-        @assert width > 0 "WindowFunction width must be bigger than 0"
+        @argcheck width > 0 "WindowFunction width must be bigger than 0"
         new{F,T}(_f, width)
     end
 end
 
 function(w::WindowFunction)(x)
-    x < 0 && error("undefined for negative values")
+    @argcheck x >= 0 "WindowFunctions are only defined for non-negative values"
     x > w.width && return 0.0
     w._f(x)
 end

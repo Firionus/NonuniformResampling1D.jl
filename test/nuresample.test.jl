@@ -220,8 +220,10 @@ end
     @test_throws MethodError nuresample(xin, yin, [2.2, 3.1]; abc=12) # check this dispatch isn't recursive
 end
 
-@testset "StackOverflowError with wrong argument types" begin
-    @test_broken nuresample(xin, yin, [3.2, 5.2], 1.3)
+@testset "MethodError with wrong argument types" begin
+    @test_throws MethodError nuresample(xin, yin, [3.2, 5.2], 1.3)
+    @test_throws MethodError nuresample(xin, 2.2, [3.2, 5.2], 1.3)
+    @test_throws MethodError nuresample(xin, yin, 3.2, 1.3)
 end
 
 @testset "Support Array Views as Inputs" begin

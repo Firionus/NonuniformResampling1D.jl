@@ -61,7 +61,9 @@ julia> nuresample(1:9, 1:9, [4.2, 6.2],
 
 Returns an `Array{Float64, 1}`. Other output types are currently unsupported. 
 """
-function nuresample(xin::AbstractRange, yin, xout, smoothing_function=rect_window(); kwargs...)
+function nuresample(xin::AbstractRange, yin, xout, 
+    smoothing_function::WindowFunction=rect_window(); kwargs...
+    )
     nuresample(StepRangeLen(xin), yin, xout, smoothing_function; kwargs...)
 end
 

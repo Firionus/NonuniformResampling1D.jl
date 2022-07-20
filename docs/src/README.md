@@ -11,6 +11,8 @@ The package is currently not registered, so you'll have to install it from GitHu
 ]add https://github.com/Firionus/NonuniformResampling1D.jl
 ```
 
+This package is not production ready. It is recommended to only use it for non-critical applications. 
+
 ## Getting Started
 
 ```jldoctest

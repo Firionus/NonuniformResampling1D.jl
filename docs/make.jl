@@ -23,6 +23,7 @@ DocMeta.setdocmeta!(NonuniformResampling1D, :DocTestSetup,
 
 makedocs(
     format=Markdown(),
+    modules=[NonuniformResampling1D],
 )
 
 cp("build/README.md", "../README.md", force=true)

@@ -1,7 +1,7 @@
 name = "NonuniformResampling1D"
 uuid = "c4305623-a722-4113-be18-d86c1ca1c729"
 authors = ["Johannes Fried <jcmf.schule@gmail.com> and contributors"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 ArgCheck = "dce04be8-c92d-5529-be00-80e4d2c0e197"

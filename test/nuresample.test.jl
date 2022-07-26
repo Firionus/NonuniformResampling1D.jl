@@ -111,7 +111,7 @@ end
         required_points_per_slice=1)
 
     # not enough points (the point at index -1 would be needed but does not exist)
-    @test_throws Exception nuresample(xin, yin, [2., 4.], rect_window(1.), 
+    @test_throws ErrorException nuresample(xin, yin, [2., 4.], rect_window(1.), 
         required_points_per_slice=1)
 
     # Just enough points at end
@@ -119,7 +119,7 @@ end
         required_points_per_slice=1)
 
     # not enough points (the point at index 13 would be needed but does not exist)
-    @test_throws Exception nuresample(xin, yin, [9., 11.], rect_window(1.), 
+    @test_throws ErrorException nuresample(xin, yin, [9., 11.], rect_window(1.), 
         required_points_per_slice=1)
 end
 

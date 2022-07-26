@@ -136,10 +136,10 @@ function Slice(unit_width, window::WindowFunction, xpoint, xin, left::Bool, requ
         start = xpoint
         stop = xpoint + width
     end
-    start > first(xin) - step(xin) || "not enough points at the beginning of " +
-    "the input for slice from $start to $stop"|>error
-    stop < last(xin) + step(xin) || "not enough points at the end of the input " +
-    "for slice from $start to $stop"|>error
+    start > first(xin) - step(xin) || error("not enough points at the beginning ", 
+    "of the input for slice from $start to $stop")
+    stop < last(xin) + step(xin) || error("not enough points at the end of the ",
+    "input for slice from $start to $stop")
 
     #find relevant input indices
     start_ind = find_first_above_or_equal(start, xin) 

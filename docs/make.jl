@@ -1,19 +1,7 @@
-using Pkg
+import Pkg
 
-# build example plot
-cd("../examples")
-Pkg.activate(".")
+Pkg.activate(@__DIR__)
 Pkg.instantiate()
-
-include("../examples/explanation_diagram.jl")
-include("../examples/plot_windows.jl")
-
-# build docs
-cd("../docs")
-Pkg.activate(".")
-Pkg.instantiate()
-
-push!(LOAD_PATH,"../src/")
 
 using Documenter, DocumenterMarkdown, NonuniformResampling1D
 
@@ -26,4 +14,4 @@ makedocs(
     modules=[NonuniformResampling1D],
 )
 
-cp("build/README.md", "../README.md", force=true)
+cp(joinpath(@__DIR__, "build", "README.md"), joinpath(@__DIR__, "..", "README.md"), force=true)

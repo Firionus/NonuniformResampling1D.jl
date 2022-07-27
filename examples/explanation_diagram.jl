@@ -132,4 +132,4 @@ end
 
 plot(plt_in, plt_windowed, plt_out, layout=(3,1), link=:x, xticks=false, xaxis=false, yaxis=false)
 ylims!(-1.1, 1.1)
-savefig("explanation_diagram.svg")
+savefig(joinpath(@__DIR__, "explanation_diagram.svg"))

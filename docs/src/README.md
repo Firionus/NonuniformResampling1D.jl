@@ -93,9 +93,13 @@ points. This ensures that the weight between the two slices stays approximately
 even. The upsampling step is the same between the two slices and is chosen such
 that `required_points_per_slice` are created in the smaller of the two slices.
 
-## Status
+## Examples
 
-This package is in its youth and some hiccups, like occasional errors or
-suboptimal performance, are expected. Please see the
-[Issues](https://github.com/Firionus/NonuniformResampling1D.jl/issues) for
-details and report any problems you experience. 
+I originally wrote this package to perform logarithmic smoothing. A demo
+notebook is available at
+<https://github.com/Firionus/logarithmic_smoothing_julia_demo>. 
+
+## Getting Help
+
+If you have any problems or feedback, please [open an
+issue](https://github.com/Firionus/NonuniformResampling1D.jl/issues/new). 

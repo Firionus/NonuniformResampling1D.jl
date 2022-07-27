@@ -167,7 +167,7 @@ uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 deps = ["ArgCheck", "SpecialFunctions"]
 path = ".."
 uuid = "c4305623-a722-4113-be18-d86c1ca1c729"
-version = "0.2.0"
+version = "0.2.1"
 
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]

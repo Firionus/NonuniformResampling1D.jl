@@ -34,4 +34,4 @@ plot(left_part, right_part, lanczos_part, layout=(1,3), link=:y,
 size=(1200, 450), bottom_margin = 5Plots.mm)
 xlabel!("Unit widths")
 
-savefig("windows.svg")
+savefig(joinpath(@__DIR__, "windows.svg"))
